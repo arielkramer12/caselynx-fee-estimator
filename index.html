@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CaseLynx Fee Estimator</title>
+  <style>
+    :root{
+      --clx-blue:#2C39DB;
+      --clx-sky:#6E80FF;
+      --clx-text:#1A1A1A;
+      --clx-muted:#555;
+      --clx-border:#E6E8F0;
+      --radius:12px;
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin:0;
+      color:var(--clx-text);
+      background:#fafbff;
+    }
+    .wrap{
+      max-width:720px;margin:32px auto;padding:24px;
+      background:#fff;border:1px solid var(--clx-border);border-radius:16px;
+      box-shadow:0 6px 24px rgba(44,57,219,.06);
+    }
+    h1{margin:0 0 8px;font-size:24px;line-height:1.2}
+    p.lead{margin:0 0 16px;color:var(--clx-muted)}
+    form{display:grid;gap:12px;margin-top:8px}
+    label{font-weight:600;font-size:14px}
+    input,select,textarea{
+      width:100%;padding:12px;border:1px solid var(--clx-border);
+      border-radius:10px;font-size:16px;background:#fff;
+    }
+    .row{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+    @media (max-width:640px){ .row{grid-template-columns:1fr} }
+    .result{
+      display:none;border:1px solid var(--clx-border);border-radius:12px;padding:14px;
+      background:#fcfdff;
+    }
+    .result .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .total{font-weight:800;font-size:20px}
+    .bd{color:var(--clx-muted);line-height:1.6}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    button, .secondary{
+      padding:12px 14px;border:none;border-radius:10px;cursor:pointer;
+      font-weight:700;font-size:14px;
+    }
+    button.primary{background:var(--clx-blue);color:#fff}
+    .secondary{background:#eef1ff;color:#102; border:1px solid #dfe3ff}
+    .note{font-size:12px;color:#6b7280}
+    .brandbar{
+      height:6px;background:linear-gradient(90deg,var(--clx-blue),var(--clx-sky));
+      border-radius:6px;margin:0 0 16px;
+    }
+    .footer{margin-top:18px;color:#6b7280;font-size:12px}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brandbar"></div>
+    <h1>Fee Estimator</h1>
+    <p class="lead">Instant estimate using tiers:
+      <em>$5,000 base up to 600 pages; $5/page (600–1,000), $3/page (1,000–5,000), $1/page (5,000+)</em>.
+    </p>
+
+    <form id="estimator" onsubmit="return false;">
+      <div class="row">
+        <label>Claimant Name
+          <input name="claimant" type="text" placeholder="e.g., Jane Doe" />
+        </label>
+        <label>Request Type
+          <select name="request_type">
+            <option value="">Select…</option>
+            <option>IME</option>
+            <option>CME</option>
+            <option>Record Review</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>Firm Contact Email
+          <input name="email" type="email" placeholder="you@firm.com" />
+        </label>
+        <label>Record Pages
+          <input id="pages" name="pages" type="number" min="1" step="1" placeholder="Enter pages" required oninput="recalc()" />
+        </label>
+      </div>
+
+      <div id="result" class="result">
+        <div class="top">
+          <strong>Estimated Total</strong>
+          <div id="total" class="total"></div>
+        </div>
+        <div id="breakdown" class="bd"></div>
+        <div class="actions" style="margin-top:10px">
+          <button class="primary" id="copyBtn" onclick="copyBreakdown()">Copy breakdown</button>
+          <button class="secondary" onclick="window.print()">Print / Save PDF</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" onclick="recalc()">Calculate</button>
+        <button class="secondary hidden" id="sendBtn" onclick="sendToEndpoint()">Send Estimate</button>
+      </div>
+      <div class="note">Optional: Wire this to a free endpoint (Formspree/Basin/Getform) by setting <code>ENDPOINT_URL</code> in the source.</div>
+      <div id="submitMsg" class="note hidden" style="color:#0a7d34;font-weight:700">Thanks! We received your estimate.</div>
+      <div id="submitErr" class="note hidden" style="color:#b00020;font-weight:700">Something went wrong. Please try again.</div>
+    </form>
+
+    <div class="footer">© CaseLynx</div>
+  </div>
+
+<script>
+  // ---- Config ----
+  // If you set an endpoint URL, the "Send Estimate" button will appear.
+  // Example (Formspree): const ENDPOINT_URL = "https://formspree.io/f/abcxyz";
+  const ENDPOINT_URL = ""; // leave blank to disable sending
+
+  const USD = n => n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+
+  function calcFee(pages) {
+    const base = 5000;
+    const t1 = Math.max(0, Math.min(pages, 1000) - 600) * 5;
+    const t2 = Math.max(0, Math.min(pages, 5000) - 1000) * 3;
+    const t3 = Math.max(0, pages - 5000) * 1;
+    const total = base + t1 + t2 + t3;
+    return { total, t1, t2, t3 };
+  }
+
+  function recalc() {
+    const p = parseInt(document.getElementById('pages').value, 10);
+    const resultBox = document.getElementById('result');
+    if (!p || p < 1) { resultBox.style.display = 'none'; return; }
+
+    const { total, t1, t2, t3 } = calcFee(p);
+    document.getElementById('total').textContent = USD(total);
+
+    const parts = [
+      "Base (up to 600 pages): " + USD(5000),
+      (t1 ? "$5/page for pages 601–" + Math.min(p,1000) + ": " + USD(t1) : null),
+      (t2 ? "$3/page for pages 1,001–" + Math.min(p,5000) + ": " + USD(t2) : null),
+      (t3 ? "$1/page for pages 5,001–" + p + ": " + USD(t3) : null)
+    ].filter(Boolean);
+
+    document.getElementById('breakdown').innerHTML = parts.map(x => "• " + x).join("<br>");
+    resultBox.style.display = 'block';
+
+    // Toggle send button visibility based on endpoint config
+    document.getElementById('sendBtn').classList.toggle('hidden', !ENDPOINT_URL);
+  }
+
+  async function sendToEndpoint(){
+    if(!ENDPOINT_URL){ return; }
+    const form = document.getElementById('estimator');
+    const formData = new FormData(form);
+    const pages = parseInt(formData.get('pages')||"0", 10);
+    if(!pages){ alert("Enter Record Pages first."); return; }
+
+    const { total, t1, t2, t3 } = calcFee(pages);
+    formData.append('estimated_total', total);
+    formData.append('tier_600_1000', t1);
+    formData.append('tier_1000_5000', t2);
+    formData.append('tier_5000_plus', t3);
+
+    try{
+      const r = await fetch(ENDPOINT_URL, { method:'POST', body: formData, headers:{'Accept':'application/json'} });
+      if(r.ok){
+        document.getElementById('submitMsg').classList.remove('hidden');
+        document.getElementById('submitErr').classList.add('hidden');
+      } else {
+        throw new Error('non-200');
+      }
+    } catch(err){
+      document.getElementById('submitErr').classList.remove('hidden');
+      document.getElementById('submitMsg').classList.add('hidden');
+    }
+  }
+
+  async function copyBreakdown(){
+    const total = document.getElementById('total').textContent;
+    const bdEl = document.getElementById('breakdown');
+    const text = `Estimated Total: ${total}\n` + bdEl.innerText;
+    try{
+      await navigator.clipboard.writeText(text);
+      alert("Breakdown copied to clipboard.");
+    }catch(e){
+      // Fallback: select and copy
+      const sel = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(bdEl);
+      sel.removeAllRanges(); sel.addRange(range);
+      document.execCommand('copy');
+      sel.removeAllRanges();
+      alert("Breakdown copied.");
+    }
+  }
+</script>
+</body>
+</html>
