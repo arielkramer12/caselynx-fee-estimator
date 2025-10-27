@@ -128,7 +128,7 @@
               <input id="travelHrs" type="number" min="0" step="0.25" value="0" oninput="recalc()" />
             </label>
           </div>
-          <div class="hint">Travel time billed at $750 per hour.</div>
+          <div class="hint">Travel time billed at $750 per hour. Calculated based on distance from expert home to destination. </div>
         </div>
       </details>
 
@@ -218,7 +218,7 @@
     return { flat, extra, total: flat + extra, pages:p };
   }
 
-  /* Meetings (Teleconference only) */
+  /* Teleconference Meetings */
   function calcMeetings(teleMinutes){
     const teleBlocks = Math.ceil(Math.max(0, teleMinutes)/30);
     const tele = teleBlocks * 500;
