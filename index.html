@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>My CaseLynx Fee Estimator</title>
+  <title>MyCaseLynx Fee Estimator</title>
   <!-- Brand fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -11,19 +11,19 @@
       --clx-blue:#2C39DB;
       --clx-sky:#6E80FF;
       --clx-text:#1A1A1A;
-      --clx-muted:#555;
+      --clx-muted:#616161;
       --clx-border:#E6E8F0;
+      --clx-bg:#fafbff;
+      --clx-chip:#eef2ff;
     }
     *{box-sizing:border-box}
     body{
       font-family: Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
-      margin:0;
-      color:var(--clx-text);
-      background:#fafbff;
+      margin:0;color:var(--clx-text);background:var(--clx-bg);
     }
     .wrap{
-      max-width:760px;margin:32px auto;padding:24px;
-      background:#fff;border:1px solid var(--clx-border);border-radius:16px;
+      max-width:760px;margin:32px auto;padding:24px;background:#fff;
+      border:1px solid var(--clx-border);border-radius:16px;
       box-shadow:0 6px 24px rgba(44,57,219,.06);
     }
     .brandbar{
@@ -35,7 +35,8 @@
       margin:0 0 4px;font-size:24px;line-height:1.2;font-weight:700;
     }
     p.lead{margin:4px 0 16px;color:var(--clx-muted)}
-    form{display:grid;gap:16px;margin-top:8px}
+    .sublead{margin-top:-6px;margin-bottom:14px;color:#424242;font-size:14px}
+    form{display:grid;gap:12px;margin-top:8px}
     label{font-weight:600;font-size:14px}
     input,select{
       width:100%;padding:12px;border:1px solid var(--clx-border);
@@ -43,132 +44,191 @@
     }
     .row{display:grid;gap:12px;grid-template-columns:1fr 1fr}
     @media (max-width:640px){ .row{grid-template-columns:1fr} }
-    fieldset{
-      border:1px solid var(--clx-border);border-radius:12px;padding:14px;margin:0;
+
+    /* Collapsible sections */
+    details{
+      border:1px solid var(--clx-border);border-radius:12px;background:#fff;
+      overflow:hidden;
     }
-    legend{
-      padding:0 8px;font-weight:800;color:#222;font-size:14px;
-      font-family:"Cabinet Grotesk", Roboto, sans-serif;
+    summary{
+      list-style:none;cursor:pointer;padding:14px 16px;display:flex;gap:8px;align-items:center;
+      font-family:"Cabinet Grotesk", Roboto, sans-serif;font-weight:700;
+      background:#fff;
+    }
+    summary::-webkit-details-marker{display:none}
+    .caret{width:10px;height:10px;border-right:2px solid #7a7a7a;border-bottom:2px solid #7a7a7a;transform:rotate(-45deg);transition:transform .2s ease}
+    details[open] .caret{transform:rotate(45deg)}
+    .panel{padding:14px 16px;border-top:1px solid var(--clx-border);display:grid;gap:12px}
+    .badge{
+      background:var(--clx-chip);
+      color:#3730a3;
+      font-weight:700;
+      border-radius:999px;
+      padding:2px 8px;
+      font-size:11px;
     }
     .hint{color:var(--clx-muted);font-size:12px;margin-top:4px}
+
+    /* Result */
     .result{
-      display:none;border:1px solid var(--clx-border);border-radius:12px;padding:14px;
-      background:#fcfdff;
+      display:none;border:1px solid var(--clx-border);border-radius:12px;padding:0;background:#fcfdff;
     }
-    .result .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .result .top{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:12px 14px;
+    }
     .total{font-weight:800;font-size:20px}
-    .bd{color:var(--clx-muted);line-height:1.6}
+    .bd{border-top:1px solid var(--clx-border);padding:10px 14px}
+    .lines{display:grid;gap:6px}
+    .line{
+      display:grid;grid-template-columns:1fr auto;gap:12px;
+      align-items:center;font-size:14px;color:#374151;
+    }
+    .amount{font-variant-numeric: tabular-nums; font-weight:700}
+    .muted{color:var(--clx-muted)}
+    .actions{display:flex;gap:8px;margin-top:4px}
     button{
       padding:12px 14px;border:none;border-radius:10px;cursor:pointer;
       font-weight:700;font-size:14px;background:var(--clx-blue);color:#fff;
     }
-    .footer{margin-top:18px;color:#6b7280;font-size:12px}
+    .btn-ghost{background:#eef2ff;color:#1f2aeb}
     .footnote{
-      margin-top:2px;
-      font-size:13px;
-      color:#676767;
-      line-height:1.5;
+      margin-top:10px;font-size:12.5px;color:#676767;line-height:1.5;
     }
-    .actions{display:flex;gap:8px}
-    .muted{color:#666}
+    .footer{margin-top:14px;color:#6b7280;font-size:12px}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="brandbar"></div>
-    <h1>My CaseLynx Fee Estimator</h1>
-    <p class="lead">Generate an estimated fee for expert work (exam/review + any selected services).</p>
+    <h1>MyCaseLynx Fee Estimator</h1>
+    <p class="lead">Generate an estimated fee for expert work.</p>
+    <p class="sublead">Pick what applies and fill in fields below. Leave optional sections closed to skip.</p>
 
     <form id="estimator" onsubmit="return false;">
-      <!-- Core case details -->
-      <fieldset>
-        <legend>Core Case</legend>
-        <div class="row">
-          <label>Case Type
-            <select id="caseType" name="case_type" onchange="recalc()">
-              <option value="exam" selected>IME / CME (exam + report)</option>
-              <option value="review">Record Review Only (report)</option>
-            </select>
-          </label>
 
-          <label>Estimated # Record Pages
-            <input id="pages" name="pages" type="number" min="1" step="1" placeholder="Enter pages" required oninput="recalc()" />
-          </label>
-        </div>
-        <div class="hint">
-          Base: $5,000 for IME/CME, $2,500 for Record Review (includes up to 600 pages). Page overage uses tiered rates.
-        </div>
-      </fieldset>
+      <!-- Core Case (open by default) -->
+      <details open>
+        <summary>
+          <span class="caret"></span>
+          Core Case
+        </summary>
+        <div class="panel">
+          <div class="row">
+            <label>Case Type
+              <select id="caseType" name="case_type" onchange="recalc()">
+                <option value="exam" selected>IME / CME (exam + report)</option>
+                <option value="review">Record Review Only (report)</option>
+              </select>
+            </label>
 
-      <!-- Imaging Review -->
-      <fieldset>
-        <legend>Imaging Review (optional)</legend>
-        <div class="row">
-          <label>X-ray / standard studies (#)
-            <input id="xrays" type="number" min="0" step="1" value="0" oninput="recalc()" />
-          </label>
-          <label>MRI / CT studies (#)
-            <input id="mricts" type="number" min="0" step="1" value="0" oninput="recalc()" />
-          </label>
+            <label>Estimated # Record Pages
+              <input id="pages" name="pages" type="number" min="1" step="1" placeholder="Enter pages" required oninput="recalc()" />
+            </label>
+          </div>
+          <div class="hint">
+            Base: $5,000 (IME/CME) or $2,500 (Record Review). Both include up to 600 pages. Tiered page overage applies beyond 600.
+          </div>
         </div>
-        <div class="hint">X-ray/standard: $75 per study; MRI/CT: $150 per study.</div>
-      </fieldset>
+      </details>
 
-      <!-- Addendum -->
-      <fieldset>
-        <legend>Addendum Review & Report (optional)</legend>
-        <div class="row">
-          <label>Addendum pages (total)
-            <input id="addPages" type="number" min="0" step="1" value="0" oninput="recalc()" />
-          </label>
-          <label class="muted">Reference limit
-            <input disabled value="Up to 200 pages included in flat fee" />
-          </label>
-        </div>
-        <div class="hint">$1,000 flat covers up to 200 pages; additional pages billed at $5/page.</div>
-      </fieldset>
+      <!-- Optional sections notice -->
+      <div class="hint" style="margin:4px 2px 0 2px;">
+        <span class="badge">Optional</span> The sections below are not required—expand only if they apply.
+      </div>
 
-      <!-- Meetings & Travel -->
-      <fieldset>
-        <legend>Meetings & Travel (optional)</legend>
-        <div class="row">
-          <label>Teleconference / attorney meeting (minutes)
-            <input id="teleMin" type="number" min="0" step="5" value="0" oninput="recalc()" />
-          </label>
-          <label>Travel time (hours)
-            <input id="travelHrs" type="number" min="0" step="0.25" value="0" oninput="recalc()" />
-          </label>
+      <!-- Imaging Review (optional) -->
+      <details>
+        <summary>
+          <span class="caret"></span>
+          Imaging Review <span class="badge">Optional</span>
+        </summary>
+        <div class="panel">
+          <div class="row">
+            <label>X-ray / standard studies (#)
+              <input id="xrays" type="number" min="0" step="1" value="0" oninput="recalc()" />
+            </label>
+            <label>MRI / CT studies (#)
+              <input id="mricts" type="number" min="0" step="1" value="0" oninput="recalc()" />
+            </label>
+          </div>
+          <div class="hint">X-ray/standard: $75 per study; MRI/CT: $150 per study.</div>
         </div>
-        <div class="hint">Teleconference billed $500 per 30 min (rounded up). Travel billed $750 per hour.</div>
-      </fieldset>
+      </details>
 
-      <!-- Court-related services -->
-      <fieldset>
-        <legend>Court-Related Services (optional)</legend>
-        <div class="row">
-          <label>Deposition hours (expected)
-            <input id="depoHrs" type="number" min="0" step="0.5" value="0" oninput="recalc()" />
-          </label>
-          <label>Preparation for testimony (hours)
-            <input id="prepHrs" type="number" min="0" step="0.5" value="0" oninput="recalc()" />
-          </label>
+      <!-- Addendum (optional) -->
+      <details>
+        <summary>
+          <span class="caret"></span>
+          Addendum Review & Report <span class="badge">Optional</span>
+        </summary>
+        <div class="panel">
+          <div class="row">
+            <label>Addendum pages (total)
+              <input id="addPages" type="number" min="0" step="1" value="0" oninput="recalc()" />
+            </label>
+            <label>Addendum images (total)
+              <input id="addImages" type="number" min="0" step="1" value="0" oninput="recalc()" />
+            </label>
+          </div>
+          <div class="hint">
+            Flat <b>$1,000</b> covers up to <b>200 pages</b> <i>or</i> <b>6 images</b>. Pages beyond 200 are billed at <b>$5/page</b>.
+          </div>
         </div>
-        <div class="row">
-          <label>Testimony type
-            <select id="testimonyType" onchange="recalc()">
-              <option value="none" selected>None</option>
-              <option value="inperson">In-person testimony</option>
-              <option value="virtual">Virtual testimony</option>
-            </select>
-          </label>
-          <label>Testimony days
-            <input id="testimonyDays" type="number" min="0" step="1" value="0" oninput="recalc()" />
-          </label>
+      </details>
+
+      <!-- Meetings & Travel (optional) -->
+      <details>
+        <summary>
+          <span class="caret"></span>
+          Meetings & Travel <span class="badge">Optional</span>
+        </summary>
+        <div class="panel">
+          <div class="row">
+            <label>Teleconference / attorney meeting (minutes)
+              <input id="teleMin" type="number" min="0" step="5" value="0" oninput="recalc()" />
+            </label>
+            <label>Travel time (hours)
+              <input id="travelHrs" type="number" min="0" step="0.25" value="0" oninput="recalc()" />
+            </label>
+          </div>
+          <div class="hint">Teleconference billed at $500 per 30 minutes (rounded up). Travel time billed separately at $750 per hour.</div>
         </div>
-        <div class="hint">
-          Deposition: $2,500 first 2 hours (minimum), then $1,000/hour thereafter. Testimony: In-person $10,000/day; Virtual $5,000/day. Prep: $1,000/hour.
+      </details>
+
+      <!-- Court-related (optional) -->
+      <details>
+        <summary>
+          <span class="caret"></span>
+          Court-Related Services <span class="badge">Optional</span>
+        </summary>
+        <div class="panel">
+          <div class="row">
+            <label>Deposition hours (expected)
+              <input id="depoHrs" type="number" min="0" step="0.5" value="0" oninput="recalc()" />
+            </label>
+            <label>Preparation for testimony (hours)
+              <input id="prepHrs" type="number" min="0" step="0.5" value="0" oninput="recalc()" />
+            </label>
+          </div>
+          <div class="row">
+            <label>Testimony type
+              <select id="testimonyType" onchange="recalc()">
+                <option value="none" selected>None</option>
+                <option value="inperson">In-person testimony</option>
+                <option value="virtual">Virtual testimony</option>
+              </select>
+            </label>
+            <label>Testimony days
+              <input id="testimonyDays" type="number" min="0" step="1" value="0" oninput="recalc()" />
+            </label>
+          </div>
+          <div class="hint">
+            Deposition: $2,500 first 2 hours (minimum), then $1,000/hour thereafter. Prep: $1,000/hour.
+            Testimony: In-person $10,000/day; Virtual $5,000/day.
+          </div>
         </div>
-      </fieldset>
+      </details>
 
       <!-- Result -->
       <div id="result" class="result">
@@ -176,54 +236,66 @@
           <strong>Estimated Total</strong>
           <div id="total" class="total"></div>
         </div>
-        <div id="breakdown" class="bd"></div>
+        <div class="bd">
+          <div id="lines" class="lines"></div>
+        </div>
       </div>
 
       <div class="actions">
         <button onclick="recalc()">Calculate</button>
-        <button type="reset" onclick="setTimeout(recalc,0)">Reset</button>
+        <button type="reset" class="btn-ghost" onclick="setTimeout(recalc,0)">Reset</button>
       </div>
     </form>
 
     <p class="footnote">
-      Disclaimer: This estimate reflects selections above and excludes other ad hoc services or policy adjustments (e.g., cancellations, late fees).
-      Final invoices will reflect actual work performed and payment terms.
+      This calculator provides a non-binding estimate based on your inputs. Final billing reflects actual services rendered,
+      applicable terms, and any policy items (e.g., rescheduling/cancellation, late fees). Estimates may change if scope changes.
     </p>
 
     <div class="footer">© CaseLynx</div>
   </div>
 
 <script>
-  const USD = n => n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+  const USD = n => (Number.isFinite(n) ? n : 0).toLocaleString(
+    undefined,{style:'currency',currency:'USD',maximumFractionDigits:0}
+  );
 
+  /* ----- Core & Overage ----- */
   function pageOverage(pages){
-    // Tiers: 600–1,000 = $5/page; 1,000–5,000 = $3/page; 5,000+ = $1/page
-    const t1 = Math.max(0, Math.min(pages, 1000) - 600) * 5;
-    const t2 = Math.max(0, Math.min(pages, 5000) - 1000) * 3;
-    const t3 = Math.max(0, pages - 5000) * 1;
+    const p = Math.max(0, pages|0);
+    const t1 = Math.max(0, Math.min(p, 1000) - 600) * 5;   // 601–1000 @ $5
+    const t2 = Math.max(0, Math.min(p, 5000) - 1000) * 3;  // 1001–5000 @ $3
+    const t3 = Math.max(0, p - 5000) * 1;                  // 5001+ @ $1
     return { t1, t2, t3, total: t1 + t2 + t3 };
   }
-
   function calcCore(pages, type){
     const base = (type === 'review') ? 2500 : 5000;
     const over = pageOverage(pages);
     return { base, over, total: base + over.total };
   }
 
+  /* ----- Imaging ----- */
   function calcImaging(xrayCount, mriCtCount){
     const xr = Math.max(0, xrayCount|0) * 75;
     const mc = Math.max(0, mriCtCount|0) * 150;
     return { xr, mc, total: xr + mc };
   }
 
-  function calcAddendum(addPages){
+  /* ----- Addendum: $1,000 covers up to 200 pages OR 6 images; pages >200 @ $5/page ----- */
+  function calcAddendum(addPages, addImages){
     const p = Math.max(0, addPages|0);
-    if (p === 0) return { flat:0, extra:0, total:0 };
-    const flat = 1000; // up to 200 pages
+    const imgs = Math.max(0, addImages|0);
+
+    if (p===0 && imgs===0) return { flat:0, extra:0, total:0 };
+
+    const flat = 1000;
+    // Only pages have an overage per provided schedule. Images are capped at 6 in flat fee.
     const extra = Math.max(0, p - 200) * 5;
-    return { flat, extra, total: flat + extra };
+
+    return { flat, extra, total: flat + extra, pages:p, images:imgs };
   }
 
+  /* ----- Meetings & Travel ----- */
   function calcMeetings(teleMinutes, travelHours){
     const teleBlocks = Math.ceil(Math.max(0, teleMinutes)/30);
     const tele = teleBlocks * 500;
@@ -231,15 +303,13 @@
     return { tele, travel, total: tele + travel, teleBlocks };
   }
 
+  /* ----- Court ----- */
   function calcCourt(depoHrs, prepHrs, testimonyType, testimonyDays){
-    // Deposition: $2,500 includes first 2 hours (minimum if >0), then $1,000/hr thereafter
     const dH = Math.max(0, Number(depoHrs) || 0);
     const deposition = (dH > 0) ? (2500 + Math.max(0, dH - 2) * 1000) : 0;
 
-    // Prep: $1,000 / hr
     const prep = Math.max(0, Number(prepHrs) || 0) * 1000;
 
-    // Testimony: In-person $10k/day; Virtual $5k/day
     const days = Math.max(0, testimonyDays|0);
     let testimony = 0;
     if (testimonyType === 'inperson') testimony = days * 10000;
@@ -250,74 +320,78 @@
 
   function recalc(){
     const resultBox = document.getElementById('result');
+    const linesEl = document.getElementById('lines');
 
     const type  = document.getElementById('caseType').value;
     const pages = parseInt(document.getElementById('pages').value, 10);
 
-    const xray  = parseInt(document.getElementById('xrays').value, 10);
-    const mriCt = parseInt(document.getElementById('mricts').value, 10);
+    const xray  = parseInt(document.getElementById('xrays')?.value || "0", 10);
+    const mriCt = parseInt(document.getElementById('mricts')?.value || "0", 10);
 
-    const addPg = parseInt(document.getElementById('addPages').value, 10);
+    const addPg = parseInt(document.getElementById('addPages')?.value || "0", 10);
+    const addIm = parseInt(document.getElementById('addImages')?.value || "0", 10);
 
-    const teleM = parseInt(document.getElementById('teleMin').value, 10);
-    const travH = parseFloat(document.getElementById('travelHrs').value);
+    const teleM = parseInt(document.getElementById('teleMin')?.value || "0", 10);
+    const travH = parseFloat(document.getElementById('travelHrs')?.value || "0");
 
-    const depoH = parseFloat(document.getElementById('depoHrs').value);
-    const prepH = parseFloat(document.getElementById('prepHrs').value);
-    const testT = document.getElementById('testimonyType').value;
-    const testD = parseInt(document.getElementById('testimonyDays').value, 10);
+    const depoH = parseFloat(document.getElementById('depoHrs')?.value || "0");
+    const prepH = parseFloat(document.getElementById('prepHrs')?.value || "0");
+    const testT = document.getElementById('testimonyType')?.value || "none";
+    const testD = parseInt(document.getElementById('testimonyDays')?.value || "0", 10);
 
     if (!pages || pages < 1){
       resultBox.style.display = 'none';
-      document.getElementById('breakdown').innerHTML = '';
+      linesEl.innerHTML = '';
       document.getElementById('total').textContent = '';
       return;
     }
 
     // Components
     const core = calcCore(pages, type);
-    const img  = calcImaging(xray||0, mriCt||0);
-    const add  = calcAddendum(addPg||0);
-    const mtg  = calcMeetings(teleM||0, travH||0);
-    const crt  = calcCourt(depoH||0, prepH||0, testT, testD||0);
+    const img  = calcImaging(xray, mriCt);
+    const add  = calcAddendum(addPg, addIm);
+    const mtg  = calcMeetings(teleM, travH);
+    const crt  = calcCourt(depoH, prepH, testT, testD);
 
     const grandTotal = core.total + img.total + add.total + mtg.total + crt.total;
 
-    // Breakdown
-    const parts = [];
+    // Build clean lines
+    const lines = [];
 
     // Core
-    parts.push("Base (" + (type === 'review' ? "Record Review" : "IME/CME") + ", up to 600 pages): " + USD(core.base));
-    const over = core.over;
-    if (over.t1) parts.push("$5/page for pages 601–" + Math.min(pages,1000) + ": " + USD(over.t1));
-    if (over.t2) parts.push("$3/page for pages 1,001–" + Math.min(pages,5000) + ": " + USD(over.t2));
-    if (over.t3) parts.push("$1/page for pages 5,001–" + pages + ": " + USD(over.t3));
+    lines.push(["Base — " + (type === 'review' ? "Record Review" : "IME/CME") + " (up to 600 pages)", USD(core.base)]);
+    const { t1, t2, t3 } = core.over;
+    if (t1) lines.push([`Page overage 601–${Math.min(pages,1000)} @ $5/page`, USD(t1)]);
+    if (t2) lines.push([`Page overage 1,001–${Math.min(pages,5000)} @ $3/page`, USD(t2)]);
+    if (t3) lines.push([`Page overage 5,001–${pages} @ $1/page`, USD(t3)]);
 
     // Imaging
-    if (img.xr) parts.push("Imaging – X-ray/standard (" + (xray||0) + "): " + USD(img.xr));
-    if (img.mc) parts.push("Imaging – MRI/CT (" + (mriCt||0) + "): " + USD(img.mc));
+    if (img.xr) lines.push([`Imaging — X-ray/standard (${xray})`, USD(img.xr)]);
+    if (img.mc) lines.push([`Imaging — MRI/CT (${mriCt})`, USD(img.mc)]);
 
     // Addendum
     if (add.total){
-      parts.push("Addendum review & report (flat): " + USD(add.flat));
-      if (add.extra) parts.push("Addendum extra pages (" + Math.max(0,(addPg||0)-200) + " @ $5/page): " + USD(add.extra));
+      lines.push([`Addendum review & report (flat)`, USD(add.flat)]);
+      if (add.extra) lines.push([`Addendum extra pages (${Math.max(0, add.pages-200)} @ $5/page)`, USD(add.extra)]);
+      else lines.push([`Addendum scope`, `${add.pages||0} pages, ${add.images||0} images`]);
     }
 
-    // Meetings & travel
-    if (mtg.tele) parts.push("Teleconference (" + mtg.teleBlocks + " × 30 min): " + USD(mtg.tele));
-    if (mtg.travel) parts.push("Travel time (" + (travH||0) + " hrs): " + USD(mtg.travel));
+    // Meetings & Travel
+    if (mtg.tele)   lines.push([`Teleconference (${mtg.teleBlocks} × 30 min)`, USD(mtg.tele)]);
+    if (mtg.travel) lines.push([`Travel time (${travH} hrs)`, USD(mtg.travel)]);
 
-    // Court-related
-    if (crt.deposition) parts.push("Deposition (incl. first 2 hrs): " + USD(crt.deposition));
-    if (crt.prep)       parts.push("Preparation for testimony (" + (prepH||0) + " hrs): " + USD(crt.prep));
+    // Court
+    if (crt.deposition) lines.push([`Deposition (incl. first 2 hrs)`, USD(crt.deposition)]);
+    if (crt.prep)       lines.push([`Preparation for testimony (${prepH} hrs)`, USD(crt.prep)]);
     if (crt.testimony){
-      if (testT === 'inperson') parts.push("Court testimony – In-person (" + (testD||0) + " day[s]): " + USD(crt.testimony));
-      if (testT === 'virtual')  parts.push("Court testimony – Virtual (" + (testD||0) + " day[s]): " + USD(crt.testimony));
+      const label = (testT === 'inperson') ? `Court testimony — In-person (${testD} day[s])`
+                                           : `Court testimony — Virtual (${testD} day[s])`;
+      lines.push([label, USD(crt.testimony)]);
     }
 
     // Render
     document.getElementById('total').textContent = USD(grandTotal);
-    document.getElementById('breakdown').innerHTML = parts.map(x => "• " + x).join("<br>");
+    linesEl.innerHTML = lines.map(([l, a]) => `<div class="line"><div>${l}</div><div class="amount">${a}</div></div>`).join("");
     resultBox.style.display = 'block';
   }
 </script>
