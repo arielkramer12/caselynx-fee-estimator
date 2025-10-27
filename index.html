@@ -106,19 +106,29 @@
         </div>
       </details>
 
-      <!-- Meetings & Travel (optional) -->
+      <!-- Meetings (optional) -->
       <details>
-        <summary><span class="caret"></span>Meetings & Travel <span class="badge">Optional</span></summary>
+        <summary><span class="caret"></span>Meetings (Teleconference) <span class="badge">Optional</span></summary>
         <div class="panel">
           <div class="row">
             <label>Teleconference / attorney meeting (minutes)
               <input id="teleMin" type="number" min="0" step="5" value="0" oninput="recalc()" />
             </label>
+          </div>
+          <div class="hint">Teleconference billed at $500 per 30 minutes.</div>
+        </div>
+      </details>
+
+      <!-- Travel (optional) -->
+      <details>
+        <summary><span class="caret"></span>Travel <span class="badge">Optional</span></summary>
+        <div class="panel">
+          <div class="row">
             <label>Travel time (hours)
               <input id="travelHrs" type="number" min="0" step="0.25" value="0" oninput="recalc()" />
             </label>
           </div>
-          <div class="hint">Teleconference billed at $500 per 30 minutes. Travel time billed separately at $750 per hour.</div>
+          <div class="hint">Travel time billed at $750 per hour.</div>
         </div>
       </details>
 
@@ -174,8 +184,11 @@
   </div>
 
 <script>
-  const USD = n => (Number.isFinite(n) ? n : 0).toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+  const USD = n => (Number.isFinite(n) ? n : 0).toLocaleString(
+    undefined,{style:'currency',currency:'USD',maximumFractionDigits:0}
+  );
 
+  /* Core & Overage */
   function pageOverage(pages){
     const p = Math.max(0, pages|0);
     const t1 = Math.max(0, Math.min(p,1000) - 600) * 5;
@@ -188,12 +201,15 @@
     const over = pageOverage(pages);
     return { base, over, total: base + over.total };
   }
+
+  /* Imaging */
   function calcImaging(xrayCount, mriCtCount){
     const xr = Math.max(0, xrayCount|0) * 75;
     const mc = Math.max(0, mriCtCount|0) * 150;
     return { xr, mc, total: xr + mc };
   }
-  // Addendum: $1,000 covers up to 200 pages (images <=6 are within flat fee; excess images go under Imaging Review)
+
+  /* Addendum */
   function calcAddendum(addPages){
     const p = Math.max(0, addPages|0);
     if (p === 0) return { flat:0, extra:0, total:0, pages:0 };
@@ -201,12 +217,21 @@
     const extra = Math.max(0, p - 200) * 5;
     return { flat, extra, total: flat + extra, pages:p };
   }
-  function calcMeetings(teleMinutes, travelHours){
+
+  /* Meetings (Teleconference only) */
+  function calcMeetings(teleMinutes){
     const teleBlocks = Math.ceil(Math.max(0, teleMinutes)/30);
     const tele = teleBlocks * 500;
-    const travel = Math.max(0, Number(travelHours) || 0) * 750;
-    return { tele, travel, total: tele + travel, teleBlocks };
+    return { tele, total: tele, teleBlocks };
   }
+
+  /* Travel (separate) */
+  function calcTravel(travelHours){
+    const travel = Math.max(0, Number(travelHours) || 0) * 750;
+    return { travel, total: travel };
+  }
+
+  /* Court */
   function calcCourt(depoHrs, prepHrs, testimonyType, testimonyDays){
     const dH = Math.max(0, Number(depoHrs) || 0);
     const deposition = (dH > 0) ? (2500 + Math.max(0, dH - 2) * 1000) : 0;
@@ -248,30 +273,32 @@
     const core = calcCore(pages, type);
     const img  = calcImaging(xray, mriCt);
     const add  = calcAddendum(addPg);
-    const mtg  = calcMeetings(teleM, travH);
+    const mtg  = calcMeetings(teleM);
+    const trv  = calcTravel(travH);
     const crt  = calcCourt(depoH, prepH, testT, testD);
 
-    const grandTotal = core.total + img.total + add.total + mtg.total + crt.total;
+    const grandTotal = core.total + img.total + add.total + mtg.total + trv.total + crt.total;
 
     const lines = [];
+    // Core
     lines.push(["Base — " + (type === 'review' ? "Record Review" : "IME/CME") + " (up to 600 pages)", USD(core.base)]);
     const { t1, t2, t3 } = core.over;
     if (t1) lines.push([`Page overage 601–${Math.min(pages,1000)} @ $5/page`, USD(t1)]);
     if (t2) lines.push([`Page overage 1,001–${Math.min(pages,5000)} @ $3/page`, USD(t2)]);
     if (t3) lines.push([`Page overage 5,001–${pages} @ $1/page`, USD(t3)]);
-
+    // Imaging
     if (img.xr) lines.push([`Imaging — X-ray/standard (${xray})`, USD(img.xr)]);
     if (img.mc) lines.push([`Imaging — MRI/CT (${mriCt})`, USD(img.mc)]);
-
+    // Addendum
     if (add.total){
       lines.push([`Addendum review & report (flat)`, USD(add.flat)]);
       if (add.extra) lines.push([`Addendum extra pages (${Math.max(0, add.pages-200)} @ $5/page)`, USD(add.extra)]);
       else lines.push([`Addendum scope`, `${add.pages||0} pages`]);
     }
-
-    if (mtg.tele)   lines.push([`Teleconference (${mtg.teleBlocks} × 30 min)`, USD(mtg.tele)]);
-    if (mtg.travel) lines.push([`Travel time (${travH} hrs)`, USD(mtg.travel)]);
-
+    // Meetings & Travel
+    if (mtg.tele) lines.push([`Teleconference (${mtg.teleBlocks} × 30 min)`, USD(mtg.tele)]);
+    if (trv.travel) lines.push([`Travel time (${travH} hrs)`, USD(trv.travel)]);
+    // Court
     if (crt.deposition) lines.push([`Deposition (incl. first 2 hrs)`, USD(crt.deposition)]);
     if (crt.prep)       lines.push([`Preparation for testimony (${prepH} hrs)`, USD(crt.prep)]);
     if (crt.testimony){
