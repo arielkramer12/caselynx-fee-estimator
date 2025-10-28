@@ -31,9 +31,9 @@
     .badge{background:var(--clx-chip);color:#3730a3;font-weight:700;border-radius:999px;padding:2px 8px;font-size:11px}
     .hint{color:var(--clx-muted);font-size:12px;margin-top:4px}
 
-    /* Optional note (prominent) */
+    /* Optional note (prominent, no badge) */
     .optional-note{
-      display:flex; align-items:center; gap:8px;
+      display:flex; align-items:center;
       margin:6px 2px 0 2px; padding:10px 12px;
       background:#f5f7ff; border:1px solid var(--clx-border); border-radius:10px;
       font-size:15px; font-weight:700; color:#2a2a2a;
@@ -123,7 +123,7 @@
               <input id="teleCount" type="number" min="0" step="1" value="0" oninput="recalc()" />
             </label>
           </div>
-          <div class="hint">Billed at $500 per 30-minute meeting.</div>
+          <div class="hint">Billed at $500 per meeting.</div>
         </div>
       </details>
 
@@ -233,7 +233,7 @@
     return { count, tele, total: tele };
   }
 
-  /* Travel (rounded to nearest hour) */
+  /* Travel (rounded to nearest hour internally) */
   function calcTravel(travelHours){
     const hrs = Math.round(Math.max(0, Number(travelHours) || 0));
     const travel = hrs * 750;
@@ -304,7 +304,6 @@
     if (add.total){
       lines.push([`Addendum review & report`, USD(add.flat)]);
       if (add.extra) lines.push([`Addendum extra pages (${Math.max(0, add.pages-200)} @ $5/page)`, USD(add.extra)]);
-      /* no 'scope' line when there is no overage */
     }
 
     // Meetings
