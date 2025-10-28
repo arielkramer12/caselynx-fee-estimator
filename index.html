@@ -31,6 +31,14 @@
     .badge{background:var(--clx-chip);color:#3730a3;font-weight:700;border-radius:999px;padding:2px 8px;font-size:11px}
     .hint{color:var(--clx-muted);font-size:12px;margin-top:4px}
 
+    /* Optional note (prominent) */
+    .optional-note{
+      display:flex; align-items:center; gap:8px;
+      margin:6px 2px 0 2px; padding:10px 12px;
+      background:#f5f7ff; border:1px solid var(--clx-border); border-radius:10px;
+      font-size:15px; font-weight:700; color:#2a2a2a;
+    }
+
     .result{display:none;border:1px solid var(--clx-border);border-radius:12px;padding:0;background:#fcfdff}
     .result .top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}
     .total{font-weight:800;font-size:20px}
@@ -73,7 +81,7 @@
       </details>
 
       <!-- Optional sections notice -->
-      <div class="hint" style="margin:4px 2px 0 2px;">
+      <div class="optional-note">
         <span class="badge">Optional</span> The sections below are not required—expand only if they apply.
       </div>
 
@@ -102,7 +110,7 @@
               <input id="addPages" type="number" min="0" step="1" value="0" oninput="recalc()" />
             </label>
           </div>
-          <div class="hint">Flat $1,000 covers up to 200 addendum pages (and up to 6 images). Pages beyond 200 are billed at $5/page. Images beyond 6 should be added under Imaging Review.</div>
+          <div class="hint">Includes up to 200 addendum pages (and up to 6 images). Pages beyond 200 are billed at $5/page. Images beyond 6 should be added under Imaging Review.</div>
         </div>
       </details>
 
@@ -111,11 +119,11 @@
         <summary><span class="caret"></span>Teleconference Meetings <span class="badge">Optional</span></summary>
         <div class="panel">
           <div class="row">
-            <label>Teleconference / attorney meeting (minutes)
-              <input id="teleMin" type="number" min="0" step="5" value="0" oninput="recalc()" />
+            <label>Number of meetings
+              <input id="teleCount" type="number" min="0" step="1" value="0" oninput="recalc()" />
             </label>
           </div>
-          <div class="hint">Teleconference billed at $500 per 30 minutes.</div>
+          <div class="hint">Billed at $500 per meeting.</div>
         </div>
       </details>
 
@@ -128,7 +136,7 @@
               <input id="travelHrs" type="number" min="0" step="0.25" value="0" oninput="recalc()" />
             </label>
           </div>
-          <div class="hint">Travel time billed at $750 per hour. Calculated based on distance from expert home to destination. </div>
+          <div class="hint">Billed at $750 per hour (rounded to the nearest whole hour).</div>
         </div>
       </details>
 
@@ -218,17 +226,18 @@
     return { flat, extra, total: flat + extra, pages:p };
   }
 
-  /* Teleconference Meetings */
-  function calcMeetings(teleMinutes){
-    const teleBlocks = Math.ceil(Math.max(0, teleMinutes)/30);
-    const tele = teleBlocks * 500;
-    return { tele, total: tele, teleBlocks };
+  /* Teleconference Meetings (count-based) */
+  function calcMeetings(meetingCount){
+    const count = Math.max(0, meetingCount|0);
+    const tele = count * 500;
+    return { count, tele, total: tele };
   }
 
-  /* Travel (separate) */
+  /* Travel (rounded to nearest hour) */
   function calcTravel(travelHours){
-    const travel = Math.max(0, Number(travelHours) || 0) * 750;
-    return { travel, total: travel };
+    const hrs = Math.round(Math.max(0, Number(travelHours) || 0));
+    const travel = hrs * 750;
+    return { hrs, travel, total: travel };
   }
 
   /* Court */
@@ -255,7 +264,7 @@
 
     const addPg = parseInt(document.getElementById('addPages')?.value || "0", 10);
 
-    const teleM = parseInt(document.getElementById('teleMin')?.value || "0", 10);
+    const teleC = parseInt(document.getElementById('teleCount')?.value || "0", 10);
     const travH = parseFloat(document.getElementById('travelHrs')?.value || "0");
 
     const depoH = parseFloat(document.getElementById('depoHrs')?.value || "0");
@@ -273,7 +282,7 @@
     const core = calcCore(pages, type);
     const img  = calcImaging(xray, mriCt);
     const add  = calcAddendum(addPg);
-    const mtg  = calcMeetings(teleM);
+    const mtg  = calcMeetings(teleC);
     const trv  = calcTravel(travH);
     const crt  = calcCourt(depoH, prepH, testT, testD);
 
@@ -286,18 +295,24 @@
     if (t1) lines.push([`Page overage 601–${Math.min(pages,1000)} @ $5/page`, USD(t1)]);
     if (t2) lines.push([`Page overage 1,001–${Math.min(pages,5000)} @ $3/page`, USD(t2)]);
     if (t3) lines.push([`Page overage 5,001–${pages} @ $1/page`, USD(t3)]);
+
     // Imaging
     if (img.xr) lines.push([`Imaging — X-ray/standard (${xray})`, USD(img.xr)]);
     if (img.mc) lines.push([`Imaging — MRI/CT (${mriCt})`, USD(img.mc)]);
+
     // Addendum
     if (add.total){
-      lines.push([`Addendum review & report (flat)`, USD(add.flat)]);
+      lines.push([`Addendum review & report`, USD(add.flat)]);
       if (add.extra) lines.push([`Addendum extra pages (${Math.max(0, add.pages-200)} @ $5/page)`, USD(add.extra)]);
-      else lines.push([`Addendum scope`, `${add.pages||0} pages`]);
+      /* no 'scope' line when there is no overage */
     }
-    // Meetings & Travel
-    if (mtg.tele) lines.push([`Teleconference (${mtg.teleBlocks} × 30 min)`, USD(mtg.tele)]);
-    if (trv.travel) lines.push([`Travel time (${travH} hrs)`, USD(trv.travel)]);
+
+    // Meetings
+    if (mtg.tele) lines.push([`Teleconference meetings (${mtg.count})`, USD(mtg.tele)]);
+
+    // Travel
+    if (trv.travel) lines.push([`Travel time (${trv.hrs} hrs)`, USD(trv.travel)]);
+
     // Court
     if (crt.deposition) lines.push([`Deposition (incl. first 2 hrs)`, USD(crt.deposition)]);
     if (crt.prep)       lines.push([`Preparation for testimony (${prepH} hrs)`, USD(crt.prep)]);
