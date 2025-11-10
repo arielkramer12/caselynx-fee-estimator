@@ -6,6 +6,7 @@
   <title>My CaseLynx Fee Estimator</title>
   <!-- Brand fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
   <style>
     :root{
       --clx-blue:#2C39DB;
@@ -16,31 +17,32 @@
     }
     *{box-sizing:border-box;}
     body{
-      font-family:Roboto,system-ui,-apple-system,Segoe UI,Arial,sans-serif;
       margin:0;
       padding:24px 12px;
+      font-family:Roboto,system-ui,-apple-system,Segoe UI,Arial,sans-serif;
       background:#fafbff;
       color:var(--clx-text);
     }
     .wrap{
       max-width:720px;
-      margin:0 auto;
+      margin:32px auto;
+      padding:24px;
       background:#fff;
-      border-radius:16px;
       border:1px solid var(--clx-border);
-      padding:20px 20px 18px;
-      box-shadow:0 8px 24px rgba(16,24,40,0.06);
+      border-radius:16px;
+      box-shadow:0 8px 24px rgba(15,23,42,0.06);
     }
     .brandbar{
       height:5px;
       border-radius:999px;
       background:linear-gradient(90deg,var(--clx-blue),var(--clx-sky));
-      margin-bottom:14px;
+      margin-bottom:16px;
     }
     h1{
+      margin:0 0 4px;
       font-family:"Cabinet Grotesk",Roboto,sans-serif;
       font-size:22px;
-      margin:0 0 4px;
+      font-weight:700;
     }
     .lead{
       margin:0 0 16px;
@@ -72,7 +74,7 @@
     select:focus,
     input:focus{
       border-color:var(--clx-blue);
-      box-shadow:0 0 0 1px rgba(44,57,219,0.04);
+      box-shadow:0 0 0 1px rgba(44,57,219,0.05);
     }
     .row{
       display:grid;
@@ -159,7 +161,7 @@
     <div class="brandbar"></div>
     <h1>My CaseLynx Fee Estimator</h1>
     <p class="lead">
-      Estimate fees for IME/CME or record review cases based on page count and common add-ons.
+      Estimate fees for IME/CME or record review based on record pages and common add-ons.
     </p>
 
     <form id="estimator" onsubmit="return false;">
@@ -178,28 +180,28 @@
         </label>
       </div>
 
-      <!-- Add-ons: using your updated rates, all optional -->
+      <!-- OPTIONAL ADD-ONS (same layout style, just a single extra row) -->
       <div class="row-4">
         <label>
-          Travel Hours (optional)
+          Travel Hours
           <input id="travelHours" type="number" min="0" step="0.5" value="0" oninput="recalc()">
           <span class="hint">$900/hr</span>
         </label>
 
         <label>
-          Virtual Trial Days (optional)
+          Virtual Trial Days
           <input id="virtualTrialDays" type="number" min="0" step="0.5" value="0" oninput="recalc()">
           <span class="hint">$12,000/day</span>
         </label>
 
         <label>
-          In-Person Trial Days (optional)
+          In-Person Trial Days
           <input id="inPersonTrialDays" type="number" min="0" step="0.5" value="0" oninput="recalc()">
           <span class="hint">$6,000/day</span>
         </label>
 
         <label>
-          Teleconference Calls (optional)
+          Teleconference Calls
           <input id="teleCalls" type="number" min="0" step="1" value="0" oninput="recalc()">
           <span class="hint">1-hour call @ $1,000</span>
         </label>
@@ -219,9 +221,8 @@
     </form>
 
     <p class="footnote">
-      This is a non-binding estimate based on the CaseLynx fee schedule. It includes base fees, page-based review tiers,
-      and any selected add-ons (travel, trial appearances, teleconferences). Actual fees may vary based on case specifics
-      and additional requests.
+      Disclaimer: This is a non-binding estimate based on the current CaseLynx fee schedule, including page-based review tiers
+      and listed add-ons. Actual fees may vary based on case specifics and any additional services requested.
     </p>
 
     <div class="footer">© CaseLynx</div>
@@ -234,17 +235,17 @@
     maximumFractionDigits: 0
   });
 
-  // Page-based fee calculation with updated Record Review base
-  function calcBaseAndPages(pages, type) {
-    // UPDATED: record review base from 2,500 to 3,500
+  // Page-based fee calculation
+  function calcFee(pages, type) {
+    // UPDATED: Record review base from 2,500 to 3,500
     const base = (type === 'review') ? 3500 : 5000;
 
     const t1 = Math.max(0, Math.min(pages, 1000) - 600) * 5;
     const t2 = Math.max(0, Math.min(pages, 5000) - 1000) * 3;
     const t3 = Math.max(0, pages - 5000) * 1;
 
-    const subtotal = base + t1 + t2 + t3;
-    return { base, t1, t2, t3, subtotal };
+    const total = base + t1 + t2 + t3;
+    return { base, total, t1, t2, t3 };
   }
 
   function recalc() {
@@ -257,7 +258,9 @@
       return;
     }
 
-    // Add-ons (with your updated rates)
+    const { base, total: pageTotal, t1, t2, t3 } = calcFee(p, type);
+
+    // UPDATED RATES FOR ADD-ONS
     const travelHours = parseFloat(document.getElementById('travelHours').value) || 0;
     const virtualTrialDays = parseFloat(document.getElementById('virtualTrialDays').value) || 0;
     const inPersonTrialDays = parseFloat(document.getElementById('inPersonTrialDays').value) || 0;
@@ -268,21 +271,17 @@
     const INPERSON_TRIAL_RATE = 6000; // per day
     const TELECONF_RATE = 1000;     // per 1-hour call
 
-    const { base, t1, t2, t3, subtotal } = calcBaseAndPages(p, type);
-
     const travelFee = travelHours * TRAVEL_RATE;
     const virtualTrialFee = virtualTrialDays * VIRTUAL_TRIAL_RATE;
     const inPersonTrialFee = inPersonTrialDays * INPERSON_TRIAL_RATE;
     const teleFee = teleCalls * TELECONF_RATE;
 
-    const total = subtotal + travelFee + virtualTrialFee + inPersonTrialFee + teleFee;
+    const grandTotal = pageTotal + travelFee + virtualTrialFee + inPersonTrialFee + teleFee;
 
-    document.getElementById('total').textContent = USD(total);
+    document.getElementById('total').textContent = USD(grandTotal);
 
     const parts = [
-      "Base (" + (type === 'review'
-        ? "Record Review Only (up to 600 pages)"
-        : "IME / CME (exam + report, up to 600 pages)") + "): " + USD(base),
+      "Base (up to 600 pages): " + USD(base),
       (t1 ? "$5/page for pages 601–" + Math.min(p, 1000) + ": " + USD(t1) : null),
       (t2 ? "$3/page for pages 1,001–" + Math.min(p, 5000) + ": " + USD(t2) : null),
       (t3 ? "$1/page for pages 5,001–" + p + ": " + USD(t3) : null),
