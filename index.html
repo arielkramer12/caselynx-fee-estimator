@@ -31,7 +31,6 @@
     .badge{background:var(--clx-chip);color:#3730a3;font-weight:700;border-radius:999px;padding:2px 8px;font-size:11px}
     .hint{color:var(--clx-muted);font-size:12px;margin-top:4px}
 
-    /* Optional note (prominent, no badge) */
     .optional-note{
       display:flex; align-items:center;
       margin:6px 2px 0 2px; padding:10px 12px;
@@ -78,17 +77,14 @@
           </div>
           <div class="hint">
             Base: $5,750 (IME/CME) or $3,500 (Record Review), each includes up to 600 pages.
-            Page overage beyond 600 pages: 600–1,000 @ $6/page; 1,000–5,000 @ $3.75/page; 5,000+ @ $1.25/page.
+            Page overage: 600–1,000 @ $6/page; 1,000–5,000 @ $3.75/page; 5,000+ @ $1.25/page.
           </div>
         </div>
       </details>
 
-      <!-- Optional sections notice -->
-      <div class="optional-note">
-        The sections below are not required—expand only if they apply.
-      </div>
+      <div class="optional-note">The sections below are not required—expand only if they apply.</div>
 
-      <!-- Imaging Review (optional) -->
+      <!-- Imaging -->
       <details>
         <summary><span class="caret"></span>Imaging Review <span class="badge">Optional</span></summary>
         <div class="panel">
@@ -104,7 +100,7 @@
         </div>
       </details>
 
-      <!-- Addendum (optional) -->
+      <!-- Addendum -->
       <details>
         <summary><span class="caret"></span>Addendum Review & Report <span class="badge">Optional</span></summary>
         <div class="panel">
@@ -113,40 +109,33 @@
               <input id="addPages" type="number" min="0" step="1" value="0" oninput="recalc()" />
             </label>
           </div>
-          <div class="hint">
-            Includes up to 200 addendum pages (and up to 6 images). Pages beyond 200 are billed at $6/page.
-            Images beyond 6 should be added under Imaging Review.
-          </div>
+          <div class="hint">Includes up to 200 pages; extra pages billed at $6/page.</div>
         </div>
       </details>
 
-      <!-- Meetings (optional) -->
+      <!-- Meetings -->
       <details>
         <summary><span class="caret"></span>Teleconference Meetings <span class="badge">Optional</span></summary>
         <div class="panel">
-          <div class="row">
-            <label>Teleconference hours
-              <input id="teleCount" type="number" min="0" step="0.5" value="0" oninput="recalc()" />
-            </label>
-          </div>
-          <div class="hint">Billed at $1,000/hour (phone or virtual meeting with attorney, non-testimony).</div>
+          <label>Teleconference hours
+            <input id="teleCount" type="number" min="0" step="0.5" value="0" oninput="recalc()" />
+          </label>
+          <div class="hint">Billed at $1,000/hour.</div>
         </div>
       </details>
 
-      <!-- Travel (optional) -->
+      <!-- Travel -->
       <details>
         <summary><span class="caret"></span>Travel <span class="badge">Optional</span></summary>
         <div class="panel">
-          <div class="row">
-            <label>Travel time (hours)
-              <input id="travelHrs" type="number" min="0" step="0.25" value="0" oninput="recalc()" />
-            </label>
-          </div>
-          <div class="hint">Billed at $1,000 per hour (calculated based on travel time).</div>
+          <label>Travel time (hours)
+            <input id="travelHrs" type="number" min="0" step="0.25" value="0" oninput="recalc()" />
+          </label>
+          <div class="hint">Billed at $1,000/hour.</div>
         </div>
       </details>
 
-      <!-- Court-related (optional) -->
+      <!-- Court -->
       <details>
         <summary><span class="caret"></span>Court-Related Services <span class="badge">Optional</span></summary>
         <div class="panel">
@@ -158,43 +147,34 @@
               <input id="prepHrs" type="number" min="0" step="0.5" value="0" oninput="recalc()" />
             </label>
           </div>
+
           <div class="row">
-            <label>Testimony type
-              <select id="testimonyType" onchange="recalc()">
-                <option value="none" selected>None</option>
-                <option value="inperson">In-person testimony</option>
-                <option value="virtual">Virtual testimony</option>
-              </select>
-            </label>
             <label>Testimony days
               <input id="testimonyDays" type="number" min="0" step="1" value="0" oninput="recalc()" />
             </label>
           </div>
+
           <div class="hint">
-            Deposition: $3,500 for first 2 hours (minimum), then $1,000/hour thereafter.
+            Deposition: $3,500 for first 2 hours, then $1,000/hour thereafter.  
+            Testimony: $14,500/day (same rate for all testimony).  
             Preparation: $1,000/hour.
-            Court testimony (in-person or virtual): $14,500/day.
           </div>
         </div>
       </details>
 
-      <!-- Expedite Fee (optional) -->
+      <!-- Expedite Fee -->
       <details>
         <summary><span class="caret"></span>Expedite Fee <span class="badge">Optional</span></summary>
         <div class="panel">
-          <div class="row">
-            <label style="display:flex;align-items:center;gap:8px;">
-              <input id="expedite" type="checkbox" onchange="recalc()" style="width:auto;"/>
-              Expedite requested (services within 14 days of records receipt)
-            </label>
-          </div>
-          <div class="hint">
-            Adds a flat $1,500 expedite fee for professional services requested within 14 days of receiving medical records.
-          </div>
+          <label style="display:flex;align-items:center;gap:8px;">
+            <input id="expedite" type="checkbox" onchange="recalc()" style="width:auto;"/>
+            Expedite requested (services needed within 14 days)
+          </label>
+          <div class="hint">Adds a flat $1,500 expedite fee.</div>
         </div>
       </details>
 
-      <!-- Result -->
+      <!-- Results -->
       <div id="result" class="result">
         <div class="top">
           <strong>Estimated Total</strong>
@@ -209,11 +189,7 @@
       </div>
     </form>
 
-    <p class="footnote">
-      This calculator provides a non-binding estimate based on your inputs. Final billing reflects actual services rendered,
-      agreed terms, and any policy items (e.g., rescheduling/cancellation, late fees). Estimates may change if scope changes.
-    </p>
-
+    <p class="footnote">This calculator provides a non-binding estimate. Final billing reflects actual services rendered.</p>
     <div class="footer">© CaseLynx</div>
   </div>
 
@@ -222,154 +198,92 @@
     undefined,{style:'currency',currency:'USD',maximumFractionDigits:0}
   );
 
-  /* Core & Overage */
-  function pageOverage(pages){
-    const p = Math.max(0, pages|0);
-    const t1 = Math.max(0, Math.min(p,1000) - 600) * 6.0;      // 600–1,000 @ $6/page
-    const t2 = Math.max(0, Math.min(p,5000) - 1000) * 3.75;    // 1,000–5,000 @ $3.75/page
-    const t3 = Math.max(0, p - 5000) * 1.25;                   // 5,000+ @ $1.25/page
+  /* Core Overage */
+  function pageOverage(p){
+    const t1 = Math.max(0, Math.min(p,1000) - 600) * 6.0;
+    const t2 = Math.max(0, Math.min(p,5000) - 1000) * 3.75;
+    const t3 = Math.max(0, p - 5000) * 1.25;
     return { t1, t2, t3, total: t1 + t2 + t3 };
   }
+
   function calcCore(pages, type){
-    const base = (type === 'review') ? 3500 : 5750; // Record Review vs IME/CME
+    const base = (type === 'review') ? 3500 : 5750;
     const over = pageOverage(pages);
     return { base, over, total: base + over.total };
   }
 
-  /* Imaging */
-  function calcImaging(xrayCount, mriCtCount){
-    const xr = Math.max(0, xrayCount|0) * 150;   // X-ray/standard
-    const mc = Math.max(0, mriCtCount|0) * 300;  // MRI/CT
-    return { xr, mc, total: xr + mc };
+  function calcImaging(x, m){
+    return { xr: x*150, mc: m*300, total: x*150 + m*300 };
   }
 
-  /* Addendum */
-  function calcAddendum(addPages){
-    const p = Math.max(0, addPages|0);
-    if (p === 0) return { flat:0, extra:0, total:0, pages:0 };
-    const flat = 1000;
-    const extra = Math.max(0, p - 200) * 6.0; // $6/page beyond 200
-    return { flat, extra, total: flat + extra, pages:p };
+  function calcAddendum(p){
+    if (!p) return { flat:0, extra:0, total:0, pages:0 };
+    const extra = Math.max(0, p - 200) * 6;
+    return { flat:1000, extra, total:1000+extra, pages:p };
   }
 
-  /* Teleconference Meetings (hours-based) */
-  function calcMeetings(meetingHours){
-    const hours = Math.max(0, Number(meetingHours) || 0);
-    const tele = hours * 1000; // $1,000/hour
-    return { hours, tele, total: tele };
+  function calcMeetings(h){
+    return { hours:h, tele:h*1000, total:h*1000 };
   }
 
-  /* Travel (rounded to nearest hour internally) */
-  function calcTravel(travelHours){
-    const hrs = Math.round(Math.max(0, Number(travelHours) || 0));
-    const travel = hrs * 1000; // $1,000/hour
-    return { hrs, travel, total: travel };
+  function calcTravel(h){
+    const hrs = Math.round(Math.max(0,h||0));
+    return { hrs, travel:hrs*1000, total:hrs*1000 };
   }
 
-  /* Court */
-  function calcCourt(depoHrs, prepHrs, testimonyType, testimonyDays){
-    const dH = Math.max(0, Number(depoHrs) || 0);
-    // $3,500 for first 2 hours, then $1,000/hour after
-    const deposition = (dH > 0) ? (3500 + Math.max(0, dH - 2) * 1000) : 0;
-
-    const prep = Math.max(0, Number(prepHrs) || 0) * 1000; // $1,000/hour
-
-    const days = Math.max(0, testimonyDays|0);
-    let testimony = 0;
-    if (testimonyType === 'inperson' || testimonyType === 'virtual') {
-      testimony = days * 14500; // $14,500/day, same rate for in-person or virtual
-    }
-
-    return { deposition, prep, testimony, total: deposition + prep + testimony };
+  function calcCourt(depoH, prepH, days){
+    const deposition = depoH>0 ? (3500 + Math.max(0,depoH-2)*1000) : 0;
+    const prep = prepH*1000;
+    const testimony = days*14500;
+    return { deposition, prep, testimony, total: deposition+prep+testimony };
   }
 
-  /* Expedite Fee */
-  function calcExpedite(isExpedited){
-    const fee = isExpedited ? 1500 : 0;
-    return { applied: !!isExpedited, fee, total: fee };
+  function calcExpedite(checked){
+    return { fee: checked?1500:0, total: checked?1500:0, applied: checked };
   }
 
   function recalc(){
-    const resultBox = document.getElementById('result');
-    const linesEl = document.getElementById('lines');
+    const pages = parseInt(pages.value);
+    if (!pages){ result.style.display="none"; return; }
 
-    const type  = document.getElementById('caseType').value;
-    const pages = parseInt(document.getElementById('pages').value, 10);
+    const core = calcCore(pages, caseType.value);
+    const img  = calcImaging(+xrays.value, +mricts.value);
+    const add  = calcAddendum(+addPages.value);
+    const mtg  = calcMeetings(+teleCount.value);
+    const trv  = calcTravel(+travelHrs.value);
+    const crt  = calcCourt(+depoHrs.value, +prepHrs.value, +testimonyDays.value);
+    const xp   = calcExpedite(expedite.checked);
 
-    const xray  = parseInt(document.getElementById('xrays')?.value || "0", 10);
-    const mriCt = parseInt(document.getElementById('mricts')?.value || "0", 10);
-
-    const addPg = parseInt(document.getElementById('addPages')?.value || "0", 10);
-
-    const teleC = parseFloat(document.getElementById('teleCount')?.value || "0");
-    const travH = parseFloat(document.getElementById('travelHrs')?.value || "0");
-
-    const depoH = parseFloat(document.getElementById('depoHrs')?.value || "0");
-    const prepH = parseFloat(document.getElementById('prepHrs')?.value || "0");
-    const testT = document.getElementById('testimonyType')?.value || "none";
-    const testD = parseInt(document.getElementById('testimonyDays')?.value || "0", 10);
-
-    const expediteChecked = document.getElementById('expedite')?.checked || false;
-
-    if (!pages || pages < 1){
-      resultBox.style.display = 'none';
-      linesEl.innerHTML = '';
-      document.getElementById('total').textContent = '';
-      return;
-    }
-
-    const core = calcCore(pages, type);
-    const img  = calcImaging(xray, mriCt);
-    const add  = calcAddendum(addPg);
-    const mtg  = calcMeetings(teleC);
-    const trv  = calcTravel(travH);
-    const crt  = calcCourt(depoH, prepH, testT, testD);
-    const xp   = calcExpedite(expediteChecked);
-
-    const grandTotal = core.total + img.total + add.total + mtg.total + trv.total + crt.total + xp.total;
+    const total = core.total + img.total + add.total + mtg.total + trv.total + crt.total + xp.total;
 
     const lines = [];
+
     // Core
-    lines.push(["Base — " + (type === 'review' ? "Record Review" : "IME/CME") + " (up to 600 pages)", USD(core.base)]);
-    const { t1, t2, t3 } = core.over;
-    if (t1) lines.push([`Page overage 601–${Math.min(pages,1000)} @ $6/page`, USD(t1)]);
-    if (t2) lines.push([`Page overage 1,001–${Math.min(pages,5000)} @ $3.75/page`, USD(t2)]);
-    if (t3) lines.push([`Page overage 5,001–${pages} @ $1.25/page`, USD(t3)]);
+    lines.push(["Base — "+(caseType.value==="review"?"Record Review":"IME/CME")+" (up to 600 pages)", USD(core.base)]);
+    if (core.over.t1) lines.push([`Page overage 601–${Math.min(pages,1000)} @ $6/page`, USD(core.over.t1)]);
+    if (core.over.t2) lines.push([`Page overage 1,001–${Math.min(pages,5000)} @ $3.75/page`, USD(core.over.t2)]);
+    if (core.over.t3) lines.push([`Page overage 5,001–${pages} @ $1.25/page`, USD(core.over.t3)]);
 
-    // Imaging
-    if (img.xr) lines.push([`Imaging — X-ray/standard (${xray})`, USD(img.xr)]);
-    if (img.mc) lines.push([`Imaging — MRI/CT (${mriCt})`, USD(img.mc)]);
+    if (img.xr) lines.push([`Imaging — X-ray (${xrays.value})`, USD(img.xr)]);
+    if (img.mc) lines.push([`Imaging — MRI/CT (${mricts.value})`, USD(img.mc)]);
 
-    // Addendum
     if (add.total){
       lines.push([`Addendum review & report`, USD(add.flat)]);
-      if (add.extra) lines.push([`Addendum extra pages (${Math.max(0, add.pages-200)} @ $6/page)`, USD(add.extra)]);
+      if (add.extra) lines.push([`Addendum extra pages (${add.pages-200} @ $6/page)`, USD(add.extra)]);
     }
 
-    // Meetings
-    if (mtg.tele) lines.push([`Teleconference meetings (${mtg.hours} hr[s])`, USD(mtg.tele)]);
+    if (mtg.total) lines.push([`Teleconference meetings (${mtg.hours} hr[s])`, USD(mtg.total)]);
+    if (trv.total) lines.push([`Travel time (${trv.hrs} hr[s])`, USD(trv.total)]);
 
-    // Travel
-    if (trv.travel) lines.push([`Travel time (${trv.hrs} hr[s])`, USD(trv.travel)]);
-
-    // Court
     if (crt.deposition) lines.push([`Deposition (incl. first 2 hrs)`, USD(crt.deposition)]);
-    if (crt.prep)       lines.push([`Preparation for testimony (${prepH} hr[s])`, USD(crt.prep)]);
-    if (crt.testimony){
-      const label = (testT === 'inperson')
-        ? `Court testimony — In-person (${testD} day[s])`
-        : `Court testimony — Virtual (${testD} day[s])`;
-      lines.push([label, USD(crt.testimony)]);
-    }
+    if (crt.prep)       lines.push([`Preparation for testimony (${prepHrs.value} hr[s])`, USD(crt.prep)]);
+    if (crt.testimony)  lines.push([`Court testimony (${testimonyDays.value} day[s])`, USD(crt.testimony)]);
 
-    // Expedite
-    if (xp.applied) {
-      lines.push([`Expedite fee`, USD(xp.fee)]);
-    }
+    if (xp.applied) lines.push([`Expedite fee`, USD(xp.fee)]);
 
-    document.getElementById('total').textContent = USD(grandTotal);
-    linesEl.innerHTML = lines.map(([l,a]) => `<div class="line"><div>${l}</div><div class="amount">${a}</div></div>`).join("");
-    resultBox.style.display = 'block';
+    document.getElementById("total").textContent = USD(total);
+    linesEl.innerHTML = lines.map(([l,a])=>`<div class="line"><div>${l}</div><div class="amount">${a}</div></div>`).join("");
+    result.style.display = "block";
   }
 </script>
 </body>
