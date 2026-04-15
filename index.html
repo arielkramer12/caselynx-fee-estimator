@@ -22,7 +22,6 @@
       --clx-border:#dbe4f0;
       --clx-chip:#eef4ff;
       --clx-shadow:0 12px 36px rgba(21, 55, 145, 0.08);
-      --clx-radius:18px;
     }
 
     *{box-sizing:border-box}
@@ -88,7 +87,13 @@
       border-radius:16px;
       padding:14px;
       background:#fff;
-      transition:.2s ease;
+      transition:.18s ease;
+      cursor:pointer;
+    }
+
+    .legend-card:hover{
+      transform:translateY(-1px);
+      box-shadow:0 8px 20px rgba(21, 55, 145, 0.06);
     }
 
     .legend-card.active{
@@ -308,23 +313,23 @@
   <div class="wrap">
     <div class="hero">
       <h1>MyCaseLynx Fee Estimator</h1>
-      <p class="sub">Select the applicable doctor fee group below to generate a non-binding estimate.</p>
+      <p class="sub">Select the applicable doctor fee schedule below to generate a non-binding estimate.</p>
 
-      <div class="legend-title">Fee Group Guide</div>
+      <div class="legend-title">Fee Schedule Selection</div>
       <div class="group-legend">
-        <div class="legend-card active" id="legend-group1">
+        <div class="legend-card active" id="legend-group1" onclick="selectGroup('group1')">
           <div class="kicker">Group 1</div>
           <h3>Surgical Specialists</h3>
           <p>Orthopedic Surgery &amp; Neurosurgery</p>
         </div>
 
-        <div class="legend-card" id="legend-group2">
+        <div class="legend-card" id="legend-group2" onclick="selectGroup('group2')">
           <div class="kicker">Group 2</div>
           <h3>Non-Surgical Specialists</h3>
           <p>PM&amp;R (Physiatry), Neurology, Pain Management, Cardiology, Psychiatry, Podiatry, &amp; Urology</p>
         </div>
 
-        <div class="legend-card" id="legend-group3">
+        <div class="legend-card" id="legend-group3" onclick="selectGroup('group3')">
           <div class="kicker">Group 3</div>
           <h3>General Practice</h3>
           <p>Dentistry / Oral Surgery, Chiropractic, &amp; Family Medicine / Internal Medicine</p>
@@ -337,25 +342,17 @@
         <summary><span class="caret"></span>Core Services</summary>
         <div class="panel">
           <div class="row">
-            <label>Fee Group
-              <select id="feeGroup" onchange="onFeeGroupChange()">
-                <option value="group1" selected>Group 1 — Surgical Specialists</option>
-                <option value="group2">Group 2 — Non-Surgical Specialists</option>
-                <option value="group3">Group 3 — General Practice</option>
-              </select>
-            </label>
-
             <label>Case Type
               <select id="caseType" onchange="recalc()">
                 <option value="exam" selected>IME/CME (exam + report)</option>
                 <option value="review">Record review only</option>
               </select>
             </label>
-          </div>
 
-          <label>Estimated # Record Pages
-            <input id="pages" type="number" min="1" step="1" placeholder="Enter pages" oninput="recalc()" />
-          </label>
+            <label>Estimated # Record Pages
+              <input id="pages" type="number" min="1" step="1" placeholder="Enter pages" oninput="recalc()" />
+            </label>
+          </div>
 
           <div class="hint" id="feeHint"></div>
         </div>
@@ -528,15 +525,16 @@
       }
     };
 
+    let selectedGroup = "group1";
+
     function getSelectedFees() {
-      return FEE_GROUPS[document.getElementById("feeGroup").value];
+      return FEE_GROUPS[selectedGroup];
     }
 
     function updateLegend() {
-      const selected = document.getElementById("feeGroup").value;
       ["group1", "group2", "group3"].forEach(group => {
         const el = document.getElementById("legend-" + group);
-        if (el) el.classList.toggle("active", group === selected);
+        if (el) el.classList.toggle("active", group === selectedGroup);
       });
     }
 
@@ -544,7 +542,7 @@
       const f = getSelectedFees();
 
       document.getElementById("feeHint").innerHTML =
-        `Selected fee group: <strong>${f.label}</strong><br>` +
+        `Selected fee schedule: <strong>${f.label}</strong><br>` +
         `Base: ${USD(f.exam)} (IME/CME) or ${USD(f.review)} (Record Review), includes up to 600 pages.<br>` +
         `Overage: 600–1,000 @ ${USD(f.page1)}/page; 1,000–5,000 @ ${USD(f.page2)}/page; 5,000+ @ ${USD(f.page3)}/page.`;
 
@@ -698,7 +696,8 @@
       document.getElementById("result").style.display = "block";
     }
 
-    function onFeeGroupChange() {
+    function selectGroup(group) {
+      selectedGroup = group;
       updateLegend();
       updateFeeText();
       recalc();
