@@ -4,65 +4,125 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyCaseLynx Fee Estimator</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
   <style>
     :root{
-      --clx-blue:#2563eb;
-      --clx-blue-dark:#1d4ed8;
-      --clx-text:#111827;
-      --clx-sub:#6b7280;
-      --clx-bg:#f8fafc;
+      --clx-blue:#1f5eff;
+      --clx-blue-dark:#163fb7;
+      --clx-blue-soft:#eef4ff;
+      --clx-navy:#0f172a;
+      --clx-text:#1f2937;
+      --clx-sub:#667085;
+      --clx-bg:#f5f8fc;
       --clx-card:#ffffff;
-      --clx-border:#e5e7eb;
-      --clx-chip:#eef2ff;
+      --clx-border:#dbe4f0;
+      --clx-chip:#eef4ff;
+      --clx-shadow:0 12px 36px rgba(21, 55, 145, 0.08);
+      --clx-radius:18px;
     }
 
     *{box-sizing:border-box}
+
     body{
       margin:0;
       padding:24px;
-      background:var(--clx-bg);
+      background:linear-gradient(180deg,#f8fbff 0%, #f3f7fc 100%);
       color:var(--clx-text);
-      font-family:Inter, Roboto, Arial, sans-serif;
+      font-family:"Roboto", Arial, sans-serif;
     }
 
     .wrap{
-      max-width:860px;
+      max-width:920px;
       margin:0 auto;
       background:var(--clx-card);
       border:1px solid var(--clx-border);
-      border-radius:18px;
-      box-shadow:0 10px 30px rgba(0,0,0,.04);
+      border-radius:24px;
+      box-shadow:var(--clx-shadow);
       overflow:hidden;
     }
 
     .hero{
-      padding:28px 24px 18px;
+      padding:30px 24px 22px;
       border-bottom:1px solid var(--clx-border);
-      background:#fff;
+      background:
+        radial-gradient(circle at top right, rgba(31,94,255,.10), transparent 30%),
+        linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
     }
 
     h1{
       margin:0 0 8px;
-      font-size:30px;
-      line-height:1.1;
+      font-family:"Cabinet Grotesk","Roboto",Arial,sans-serif;
+      font-size:34px;
+      line-height:1.05;
+      letter-spacing:-0.02em;
+      color:var(--clx-navy);
     }
 
     .sub{
       color:var(--clx-sub);
       font-size:14px;
-      line-height:1.5;
-      margin:0;
+      line-height:1.55;
+      margin:0 0 16px;
     }
 
-    .specialty-note{
-      margin-top:10px;
-      color:#374151;
+    .legend-title{
+      font-family:"Cabinet Grotesk","Roboto",Arial,sans-serif;
+      font-size:16px;
+      font-weight:700;
+      color:var(--clx-navy);
+      margin:0 0 10px;
+    }
+
+    .group-legend{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+
+    .legend-card{
+      border:1px solid var(--clx-border);
+      border-radius:16px;
+      padding:14px;
+      background:#fff;
+      transition:.2s ease;
+    }
+
+    .legend-card.active{
+      border-color:rgba(31,94,255,.35);
+      background:linear-gradient(180deg,#f7faff 0%, #eef4ff 100%);
+      box-shadow:0 0 0 2px rgba(31,94,255,.08) inset;
+    }
+
+    .legend-card .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 9px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      color:var(--clx-blue-dark);
+      background:var(--clx-chip);
+      margin-bottom:10px;
+    }
+
+    .legend-card h3{
+      margin:0 0 6px;
+      font-family:"Cabinet Grotesk","Roboto",Arial,sans-serif;
+      font-size:18px;
+      line-height:1.1;
+      color:var(--clx-navy);
+    }
+
+    .legend-card p{
+      margin:0;
       font-size:13px;
       line-height:1.5;
-      background:#f9fafb;
-      border:1px solid var(--clx-border);
-      border-radius:12px;
-      padding:12px 14px;
+      color:#475467;
     }
 
     form{
@@ -73,7 +133,7 @@
 
     details{
       border:1px solid var(--clx-border);
-      border-radius:14px;
+      border-radius:16px;
       background:#fff;
       overflow:hidden;
     }
@@ -81,11 +141,14 @@
     summary{
       list-style:none;
       cursor:pointer;
-      padding:14px 16px;
+      padding:15px 16px;
       display:flex;
       gap:8px;
       align-items:center;
+      font-family:"Cabinet Grotesk","Roboto",Arial,sans-serif;
       font-weight:700;
+      font-size:18px;
+      color:var(--clx-navy);
       background:#fff;
     }
 
@@ -99,12 +162,13 @@
       transform:rotate(-45deg);
       transition:transform .2s ease;
       flex:0 0 auto;
+      margin-top:-2px;
     }
 
     details[open] .caret{transform:rotate(45deg)}
 
     .panel{
-      padding:14px 16px;
+      padding:14px 16px 16px;
       border-top:1px solid var(--clx-border);
       display:grid;
       gap:12px;
@@ -112,11 +176,12 @@
 
     .badge{
       background:var(--clx-chip);
-      color:#3730a3;
+      color:var(--clx-blue-dark);
       font-weight:700;
       border-radius:999px;
-      padding:2px 8px;
+      padding:3px 8px;
       font-size:11px;
+      font-family:"Roboto",Arial,sans-serif;
     }
 
     .row{
@@ -130,35 +195,36 @@
       gap:6px;
       font-size:14px;
       font-weight:600;
-      color:#374151;
+      color:#344054;
     }
 
     input, select{
       width:100%;
       border:1px solid var(--clx-border);
-      border-radius:10px;
+      border-radius:12px;
       padding:12px 12px;
       font-size:14px;
       background:#fff;
       color:var(--clx-text);
+      font-family:"Roboto", Arial, sans-serif;
     }
 
     input:focus, select:focus{
       outline:none;
-      border-color:#93c5fd;
-      box-shadow:0 0 0 3px rgba(59,130,246,.12);
+      border-color:#9dbafc;
+      box-shadow:0 0 0 3px rgba(31,94,255,.12);
     }
 
     .hint{
       color:var(--clx-sub);
       font-size:13px;
-      line-height:1.5;
+      line-height:1.55;
     }
 
     .result{
       display:none;
       border:1px solid var(--clx-border);
-      border-radius:14px;
+      border-radius:16px;
       overflow:hidden;
       background:#fff;
     }
@@ -169,18 +235,26 @@
       align-items:center;
       gap:16px;
       padding:16px;
-      background:#f8fafc;
+      background:linear-gradient(180deg,#f7faff 0%, #f0f5ff 100%);
       border-bottom:1px solid var(--clx-border);
     }
 
+    .top strong{
+      font-family:"Cabinet Grotesk","Roboto",Arial,sans-serif;
+      font-size:20px;
+      color:var(--clx-navy);
+    }
+
     .total{
+      font-family:"Cabinet Grotesk","Roboto",Arial,sans-serif;
       font-weight:800;
-      font-size:22px;
+      font-size:28px;
+      color:var(--clx-blue-dark);
+      letter-spacing:-0.02em;
     }
 
     .bd{
-      border-top:1px solid var(--clx-border);
-      padding:12px 16px;
+      padding:14px 16px;
     }
 
     .lines{
@@ -195,6 +269,7 @@
       align-items:start;
       font-size:14px;
       color:#374151;
+      padding:2px 0;
     }
 
     .amount{
@@ -205,24 +280,25 @@
     }
 
     .footnote{
-      padding:2px 4px 0;
+      padding:0 22px 18px;
       color:var(--clx-sub);
       font-size:12px;
-      line-height:1.5;
+      line-height:1.55;
       margin:0;
     }
 
     .footer{
       text-align:center;
-      color:#9ca3af;
+      color:#98a2b3;
       font-size:12px;
-      padding:0 0 8px;
+      padding:0 0 14px;
     }
 
-    @media (max-width: 680px){
+    @media (max-width: 760px){
       body{padding:12px}
+      .group-legend{grid-template-columns:1fr}
       .row{grid-template-columns:1fr}
-      .top{flex-direction:column; align-items:flex-start}
+      .top{flex-direction:column;align-items:flex-start}
       .line{grid-template-columns:1fr}
       .amount{white-space:normal}
     }
@@ -232,8 +308,28 @@
   <div class="wrap">
     <div class="hero">
       <h1>MyCaseLynx Fee Estimator</h1>
-      <p class="sub">Select the applicable doctor fee group to generate a non-binding estimate.</p>
-      <div class="specialty-note" id="groupDescription"></div>
+      <p class="sub">Select the applicable doctor fee group below to generate a non-binding estimate.</p>
+
+      <div class="legend-title">Fee Group Guide</div>
+      <div class="group-legend">
+        <div class="legend-card active" id="legend-group1">
+          <div class="kicker">Group 1</div>
+          <h3>Surgical Specialists</h3>
+          <p>Orthopedic Surgery &amp; Neurosurgery</p>
+        </div>
+
+        <div class="legend-card" id="legend-group2">
+          <div class="kicker">Group 2</div>
+          <h3>Non-Surgical Specialists</h3>
+          <p>PM&amp;R (Physiatry), Neurology, Pain Management, Cardiology, Psychiatry, Podiatry, &amp; Urology</p>
+        </div>
+
+        <div class="legend-card" id="legend-group3">
+          <div class="kicker">Group 3</div>
+          <h3>General Practice</h3>
+          <p>Dentistry / Oral Surgery, Chiropractic, &amp; Family Medicine / Internal Medicine</p>
+        </div>
+      </div>
     </div>
 
     <form onsubmit="return false;">
@@ -436,13 +532,19 @@
       return FEE_GROUPS[document.getElementById("feeGroup").value];
     }
 
+    function updateLegend() {
+      const selected = document.getElementById("feeGroup").value;
+      ["group1", "group2", "group3"].forEach(group => {
+        const el = document.getElementById("legend-" + group);
+        if (el) el.classList.toggle("active", group === selected);
+      });
+    }
+
     function updateFeeText() {
       const f = getSelectedFees();
 
-      document.getElementById("groupDescription").innerHTML =
-        `<strong>${f.label}</strong><br>Includes ${f.specialties}.`;
-
       document.getElementById("feeHint").innerHTML =
+        `Selected fee group: <strong>${f.label}</strong><br>` +
         `Base: ${USD(f.exam)} (IME/CME) or ${USD(f.review)} (Record Review), includes up to 600 pages.<br>` +
         `Overage: 600–1,000 @ ${USD(f.page1)}/page; 1,000–5,000 @ ${USD(f.page2)}/page; 5,000+ @ ${USD(f.page3)}/page.`;
 
@@ -563,15 +665,9 @@
         USD(core.base)
       ]);
 
-      if (core.over.t1) {
-        lines.push([`Page overage 601–${Math.min(pages, 1000)}`, USD(core.over.t1)]);
-      }
-      if (core.over.t2) {
-        lines.push([`Page overage 1,001–${Math.min(pages, 5000)}`, USD(core.over.t2)]);
-      }
-      if (core.over.t3) {
-        lines.push([`Page overage 5,001–${pages}`, USD(core.over.t3)]);
-      }
+      if (core.over.t1) lines.push([`Page overage 601–${Math.min(pages, 1000)}`, USD(core.over.t1)]);
+      if (core.over.t2) lines.push([`Page overage 1,001–${Math.min(pages, 5000)}`, USD(core.over.t2)]);
+      if (core.over.t3) lines.push([`Page overage 5,001–${pages}`, USD(core.over.t3)]);
 
       const xrayCount = document.getElementById("xrays").value;
       const mriCtCount = document.getElementById("mricts").value;
@@ -583,9 +679,7 @@
 
       if (add.total) {
         lines.push([`Addendum review & report`, USD(add.flat)]);
-        if (add.extra) {
-          lines.push([`Addendum extra pages (${add.pages - 200})`, USD(add.extra)]);
-        }
+        if (add.extra) lines.push([`Addendum extra pages (${add.pages - 200})`, USD(add.extra)]);
       }
 
       if (mtg.total) lines.push([`Teleconference (${mtg.hours} hr[s])`, USD(mtg.total)]);
@@ -605,10 +699,12 @@
     }
 
     function onFeeGroupChange() {
+      updateLegend();
       updateFeeText();
       recalc();
     }
 
+    updateLegend();
     updateFeeText();
     recalc();
   </script>
