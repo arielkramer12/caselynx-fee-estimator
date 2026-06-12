@@ -78,7 +78,7 @@
 
     .group-legend{
       display:grid;
-      grid-template-columns:repeat(3,1fr);
+      grid-template-columns:repeat(5,1fr);
       gap:12px;
     }
 
@@ -141,6 +141,10 @@
       border-radius:16px;
       background:#fff;
       overflow:hidden;
+    }
+
+    details.hidden{
+      display:none;
     }
 
     summary{
@@ -317,28 +321,40 @@
 
       <div class="legend-title">Fee Schedule Selection</div>
       <div class="group-legend">
+        <div class="legend-card" id="legend-group0" onclick="selectGroup('group0')">
+          <div class="kicker">Group 0</div>
+          <h3>Neurosurgery</h3>
+          <p>Neurosurgery</p>
+        </div>
+
         <div class="legend-card active" id="legend-group1" onclick="selectGroup('group1')">
           <div class="kicker">Group 1</div>
-          <h3>Surgical Specialists</h3>
-          <p>Orthopedic Surgery &amp; Neurosurgery</p>
+          <h3>Orthopedics</h3>
+          <p>Orthopedic Surgery</p>
         </div>
 
         <div class="legend-card" id="legend-group2" onclick="selectGroup('group2')">
           <div class="kicker">Group 2</div>
-          <h3>Non-Surgical Specialists</h3>
-          <p>PM&amp;R (Physiatry), Neurology, Pain Management, Cardiology, Psychiatry, Podiatry, &amp; Urology</p>
+          <h3>Non-Surgical</h3>
+          <p>PM&amp;R, Neurology, Cardiology, Psychiatry, Podiatry, &amp; Urology</p>
         </div>
 
         <div class="legend-card" id="legend-group3" onclick="selectGroup('group3')">
           <div class="kicker">Group 3</div>
           <h3>General Practice</h3>
-          <p>Dentistry / Oral Surgery, Chiropractic, &amp; Family Medicine / Internal Medicine</p>
+          <p>Dentistry, Chiropractic, &amp; Family Medicine</p>
+        </div>
+
+        <div class="legend-card" id="legend-group4" onclick="selectGroup('group4')">
+          <div class="kicker">Group 4</div>
+          <h3>Radiology</h3>
+          <p>Imaging Review Services</p>
         </div>
       </div>
     </div>
 
     <form onsubmit="return false;">
-      <details open>
+      <details open data-group="0,1,2,3">
         <summary><span class="caret"></span>Core Services</summary>
         <div class="panel">
           <div class="row">
@@ -358,7 +374,7 @@
         </div>
       </details>
 
-      <details>
+      <details data-group="0,1,2,3,4">
         <summary><span class="caret"></span>Imaging Review <span class="badge">Optional</span></summary>
         <div class="panel">
           <div class="row">
@@ -373,7 +389,7 @@
         </div>
       </details>
 
-      <details>
+      <details data-group="0,1,2,3">
         <summary><span class="caret"></span>Addendum Review &amp; Report <span class="badge">Optional</span></summary>
         <div class="panel">
           <label>Addendum pages
@@ -383,7 +399,7 @@
         </div>
       </details>
 
-      <details>
+      <details data-group="0,1,2,3,4">
         <summary><span class="caret"></span>Teleconference Meetings <span class="badge">Optional</span></summary>
         <div class="panel">
           <label>Teleconference hours
@@ -393,7 +409,7 @@
         </div>
       </details>
 
-      <details>
+      <details data-group="0,1,2,3,4">
         <summary><span class="caret"></span>Travel Time <span class="badge">Optional</span></summary>
         <div class="panel">
           <label>Travel hours
@@ -403,7 +419,7 @@
         </div>
       </details>
 
-      <details>
+      <details data-group="0,1,2,3,4">
         <summary><span class="caret"></span>Court-Related Services <span class="badge">Optional</span></summary>
         <div class="panel">
           <div class="row">
@@ -423,7 +439,7 @@
         </div>
       </details>
 
-      <details>
+      <details data-group="0,1,2,3">
         <summary><span class="caret"></span>Expedite Fee <span class="badge">Optional</span></summary>
         <div class="panel">
           <label style="display:flex;align-items:center;gap:8px;">
@@ -457,9 +473,31 @@
     }).format(n);
 
     const FEE_GROUPS = {
+      group0: {
+        label: "Group 0 — Neurosurgery",
+        specialties: "Neurosurgery",
+        exam: 8495,
+        review: 6245,
+        examOnly: 2250,
+        page1: 11.50,
+        page2: 11.50,
+        page3: 11.50,
+        xray: 150,
+        mriCt: 300,
+        addendumFlat: 1800,
+        addendumExtraPerPage: 11.50,
+        tele: 1150,
+        travel: 1150,
+        depositionBase: 4000,
+        depositionExtraHourly: 1150,
+        testimonyDay: 17500,
+        prepHourly: 1150,
+        expedite: 1500,
+        roomReservation: 150
+      },
       group1: {
-        label: "Group 1 — Surgical Specialists",
-        specialties: "Orthopedic Surgery & Neurosurgery",
+        label: "Group 1 — Orthopedics",
+        specialties: "Orthopedic Surgery",
         exam: 5750,
         review: 3500,
         examOnly: 2250,
@@ -522,6 +560,28 @@
         prepHourly: 650,
         expedite: 1500,
         roomReservation: 150
+      },
+      group4: {
+        label: "Group 4 — Radiology",
+        specialties: "Imaging Review Services",
+        exam: 0,
+        review: 0,
+        examOnly: 0,
+        page1: 0,
+        page2: 0,
+        page3: 0,
+        xray: 275,
+        mriCt: 550,
+        addendumFlat: 0,
+        addendumExtraPerPage: 0,
+        tele: 1000,
+        travel: 1000,
+        depositionBase: 3500,
+        depositionExtraHourly: 1000,
+        testimonyDay: 14500,
+        prepHourly: 1000,
+        expedite: 1500,
+        roomReservation: 0
       }
     };
 
@@ -532,25 +592,42 @@
     }
 
     function updateLegend() {
-      ["group1", "group2", "group3"].forEach(group => {
+      ["group0", "group1", "group2", "group3", "group4"].forEach(group => {
         const el = document.getElementById("legend-" + group);
         if (el) el.classList.toggle("active", group === selectedGroup);
+      });
+    }
+
+    function updateFormVisibility() {
+      const details = document.querySelectorAll("details[data-group]");
+      const groupNum = selectedGroup.replace("group", ""); // Convert "group1" to "1"
+      details.forEach(detail => {
+        const groups = detail.getAttribute("data-group").split(",");
+        detail.classList.toggle("hidden", !groups.includes(groupNum));
       });
     }
 
     function updateFeeText() {
       const f = getSelectedFees();
 
-      document.getElementById("feeHint").innerHTML =
-        `Selected fee schedule: <strong>${f.label}</strong><br>` +
-        `Base: ${USD(f.exam)} (IME/CME) or ${USD(f.review)} (Record Review), includes up to 600 pages.<br>` +
-        `Overage: 600–1,000 @ ${USD(f.page1)}/page; 1,000–5,000 @ ${USD(f.page2)}/page; 5,000+ @ ${USD(f.page3)}/page.`;
+      if (selectedGroup === "group4") {
+        // Radiology-specific text
+        document.getElementById("feeHint").innerHTML = `<strong>${f.label}</strong> — Imaging review services. Enter imaging study counts below.`;
+        document.getElementById("imagingHint").textContent =
+          `X-ray/Standard: ${USD(f.xray)}/study; MRI/CT: ${USD(f.mriCt)}/study.`;
+      } else {
+        // Surgical/non-surgical specialists
+        document.getElementById("feeHint").innerHTML =
+          `Selected fee schedule: <strong>${f.label}</strong><br>` +
+          `Base: ${USD(f.exam)} (IME/CME) or ${USD(f.review)} (Record Review), includes up to 600 pages.<br>` +
+          `Overage: 600–1,000 @ ${USD(f.page1)}/page; 1,000–5,000 @ ${USD(f.page2)}/page; 5,000+ @ ${USD(f.page3)}/page.`;
 
-      document.getElementById("imagingHint").textContent =
-        `X-ray: ${USD(f.xray)}/study; MRI/CT: ${USD(f.mriCt)}/study.`;
+        document.getElementById("imagingHint").textContent =
+          `X-ray: ${USD(f.xray)}/study; MRI/CT: ${USD(f.mriCt)}/study.`;
 
-      document.getElementById("addendumHint").textContent =
-        `Includes up to 200 pages; additional pages billed at ${USD(f.addendumExtraPerPage)}/page. Flat fee: ${USD(f.addendumFlat)}.`;
+        document.getElementById("addendumHint").textContent =
+          `Includes up to 200 pages; additional pages billed at ${USD(f.addendumExtraPerPage)}/page. Flat fee: ${USD(f.addendumFlat)}.`;
+      }
 
       document.getElementById("teleHint").textContent =
         `${USD(f.tele)}/hour (1-hour minimum).`;
@@ -572,6 +649,7 @@
     }
 
     function calcCore(pages, type, f) {
+      if (selectedGroup === "group4") return { base: 0, over: { t1: 0, t2: 0, t3: 0, total: 0 }, total: 0 };
       const base = (type === "review") ? f.review : f.exam;
       const over = pageOverage(pages, f);
       return { base, over, total: base + over.total };
@@ -586,7 +664,7 @@
     }
 
     function calcAddendum(p, f) {
-      if (!p) return { flat: 0, extra: 0, total: 0, pages: 0 };
+      if (!p || selectedGroup === "group4") return { flat: 0, extra: 0, total: 0, pages: 0 };
       const extra = Math.max(0, p - 200) * f.addendumExtraPerPage;
       return {
         flat: f.addendumFlat,
@@ -629,9 +707,17 @@
 
     function recalc() {
       const f = getSelectedFees();
+      
+      // For radiology, trigger on imaging studies; for others, on pages
       const pages = parseInt(document.getElementById("pages").value || 0, 10);
+      const xrays = parseInt(document.getElementById("xrays").value || 0, 10);
+      const mricts = parseInt(document.getElementById("mricts").value || 0, 10);
 
-      if (!pages) {
+      const hasInput = selectedGroup === "group4" 
+        ? (xrays > 0 || mricts > 0)
+        : (pages > 0);
+
+      if (!hasInput) {
         document.getElementById("result").style.display = "none";
         return;
       }
@@ -639,11 +725,7 @@
       const type = document.getElementById("caseType").value;
 
       const core = calcCore(pages, type, f);
-      const img = calcImaging(
-        parseInt(document.getElementById("xrays").value || 0, 10),
-        parseInt(document.getElementById("mricts").value || 0, 10),
-        f
-      );
+      const img = calcImaging(xrays, mricts, f);
       const add = calcAddendum(parseInt(document.getElementById("addPages").value || 0, 10), f);
       const mtg = calcMeetings(parseFloat(document.getElementById("teleCount").value || 0), f);
       const trv = calcTravel(parseFloat(document.getElementById("travelHrs").value || 0), f);
@@ -658,34 +740,45 @@
       const total = core.total + img.total + add.total + mtg.total + trv.total + crt.total + xp.total;
 
       const lines = [];
-      lines.push([
-        `Base — ${type === "review" ? "Record Review" : "IME/CME"} (${f.label}) (up to 600 pages)`,
-        USD(core.base)
-      ]);
 
-      if (core.over.t1) lines.push([`Page overage 601–${Math.min(pages, 1000)}`, USD(core.over.t1)]);
-      if (core.over.t2) lines.push([`Page overage 1,001–${Math.min(pages, 5000)}`, USD(core.over.t2)]);
-      if (core.over.t3) lines.push([`Page overage 5,001–${pages}`, USD(core.over.t3)]);
+      if (selectedGroup === "group4") {
+        // Radiology output
+        if (img.xr) lines.push([`Imaging — X-ray (${xrays})`, USD(img.xr)]);
+        if (img.mc) lines.push([`Imaging — MRI/CT (${mricts})`, USD(img.mc)]);
+      } else {
+        // Surgical/non-surgical output
+        lines.push([
+          `Base — ${type === "review" ? "Record Review" : "IME/CME"} (up to 600 pages)`,
+          USD(core.base)
+        ]);
 
-      const xrayCount = document.getElementById("xrays").value;
-      const mriCtCount = document.getElementById("mricts").value;
-      const prepHours = document.getElementById("prepHrs").value;
-      const testimonyDays = document.getElementById("testimonyDays").value;
+        if (core.over.t1) lines.push([`Page overage 601–${Math.min(pages, 1000)}`, USD(core.over.t1)]);
+        if (core.over.t2) lines.push([`Page overage 1,001–${Math.min(pages, 5000)}`, USD(core.over.t2)]);
+        if (core.over.t3) lines.push([`Page overage 5,001–${pages}`, USD(core.over.t3)]);
 
-      if (img.xr) lines.push([`Imaging — X-ray (${xrayCount})`, USD(img.xr)]);
-      if (img.mc) lines.push([`Imaging — MRI/CT (${mriCtCount})`, USD(img.mc)]);
+        const xrayCount = document.getElementById("xrays").value;
+        const mriCtCount = document.getElementById("mricts").value;
+        if (img.xr) lines.push([`Imaging — X-ray (${xrayCount})`, USD(img.xr)]);
+        if (img.mc) lines.push([`Imaging — MRI/CT (${mriCtCount})`, USD(img.mc)]);
 
-      if (add.total) {
-        lines.push([`Addendum review & report`, USD(add.flat)]);
-        if (add.extra) lines.push([`Addendum extra pages (${add.pages - 200})`, USD(add.extra)]);
+        if (add.total) {
+          lines.push([`Addendum review & report`, USD(add.flat)]);
+          if (add.extra) lines.push([`Addendum extra pages (${add.pages - 200})`, USD(add.extra)]);
+        }
       }
 
       if (mtg.total) lines.push([`Teleconference (${mtg.hours} hr[s])`, USD(mtg.total)]);
       if (trv.total) lines.push([`Travel time (${trv.hrs} hr[s])`, USD(trv.total)]);
 
       if (crt.deposition) lines.push([`Deposition (first 2 hrs incl.)`, USD(crt.deposition)]);
-      if (crt.prep) lines.push([`Preparation (${prepHours} hr[s])`, USD(crt.prep)]);
-      if (crt.testimony) lines.push([`Court testimony (${testimonyDays} day[s])`, USD(crt.testimony)]);
+      if (crt.prep) {
+        const prepHours = document.getElementById("prepHrs").value;
+        lines.push([`Preparation (${prepHours} hr[s])`, USD(crt.prep)]);
+      }
+      if (crt.testimony) {
+        const testimonyDays = document.getElementById("testimonyDays").value;
+        lines.push([`Court testimony (${testimonyDays} day[s])`, USD(crt.testimony)]);
+      }
 
       if (xp.applied) lines.push([`Expedite fee`, USD(xp.fee)]);
 
@@ -699,11 +792,13 @@
     function selectGroup(group) {
       selectedGroup = group;
       updateLegend();
+      updateFormVisibility();
       updateFeeText();
       recalc();
     }
 
     updateLegend();
+    updateFormVisibility();
     updateFeeText();
     recalc();
   </script>
