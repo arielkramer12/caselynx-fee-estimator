@@ -320,49 +320,16 @@
       <p class="sub">Select the applicable doctor fee schedule below to generate a non-binding estimate.</p>
 
       <div class="legend-title">Fee Schedule Selection</div>
-      <div class="group-legend">
-        <div class="legend-card" id="legend-group0" onclick="selectGroup('group0')">
-          <div class="kicker">Group 0</div>
-          <h3>Neurosurgery</h3>
-          <p>Neurosurgery</p>
-        </div>
-
-        <div class="legend-card active" id="legend-group1" onclick="selectGroup('group1')">
-          <div class="kicker">Group 1</div>
-          <h3>Orthopedics</h3>
-          <p>Orthopedic Surgery</p>
-        </div>
-
-        <div class="legend-card" id="legend-group2" onclick="selectGroup('group2')">
-          <div class="kicker">Group 2</div>
-          <h3>Non-Surgical</h3>
-          <p>PM&amp;R, Neurology, Cardiology, Psychiatry, Podiatry, &amp; Urology</p>
-        </div>
-
-        <div class="legend-card" id="legend-group3" onclick="selectGroup('group3')">
-          <div class="kicker">Group 3</div>
-          <h3>General Practice</h3>
-          <p>Dentistry, Chiropractic, &amp; Family Medicine</p>
-        </div>
-
-        <div class="legend-card" id="legend-group4" onclick="selectGroup('group4')">
-          <div class="kicker">Group 4</div>
-          <h3>Radiology</h3>
-          <p>Imaging Review Services</p>
-        </div>
-      </div>
+      <div class="group-legend" id="group-legend"></div>
     </div>
 
     <form onsubmit="return false;">
-      <details open data-group="0,1,2,3">
+      <details open data-section="core">
         <summary><span class="caret"></span>Core Services</summary>
         <div class="panel">
           <div class="row">
             <label>Case Type
-              <select id="caseType" onchange="recalc()">
-                <option value="exam" selected>IME/CME (exam + report)</option>
-                <option value="review">Record review only</option>
-              </select>
+              <select id="caseType" onchange="recalc()"></select>
             </label>
 
             <label>Estimated # Record Pages
@@ -374,7 +341,7 @@
         </div>
       </details>
 
-      <details data-group="0,1,2,3,4">
+      <details data-section="imaging">
         <summary><span class="caret"></span>Imaging Review <span class="badge">Optional</span></summary>
         <div class="panel">
           <div class="row">
@@ -389,17 +356,35 @@
         </div>
       </details>
 
-      <details data-group="0,1,2,3">
+      <details data-section="records">
+        <summary><span class="caret"></span>Medical Records Review <span class="badge">Optional</span></summary>
+        <div class="panel">
+          <label>Record pages
+            <input id="recPages" type="number" min="0" step="1" value="0" oninput="recalc()" />
+          </label>
+          <div class="hint" id="recordsHint"></div>
+        </div>
+      </details>
+
+      <details data-section="addendum">
         <summary><span class="caret"></span>Addendum Review &amp; Report <span class="badge">Optional</span></summary>
         <div class="panel">
           <label>Addendum pages
             <input id="addPages" type="number" min="0" step="1" value="0" oninput="recalc()" />
           </label>
+          <div class="row">
+            <label>Addendum X-ray / standard studies (#)
+              <input id="addXrays" type="number" min="0" step="1" value="0" oninput="recalc()" />
+            </label>
+            <label>Addendum MRI / CT studies (#)
+              <input id="addMricts" type="number" min="0" step="1" value="0" oninput="recalc()" />
+            </label>
+          </div>
           <div class="hint" id="addendumHint"></div>
         </div>
       </details>
 
-      <details data-group="0,1,2,3,4">
+      <details data-section="tele">
         <summary><span class="caret"></span>Teleconference Meetings <span class="badge">Optional</span></summary>
         <div class="panel">
           <label>Teleconference hours
@@ -409,7 +394,7 @@
         </div>
       </details>
 
-      <details data-group="0,1,2,3,4">
+      <details data-section="travel">
         <summary><span class="caret"></span>Travel Time <span class="badge">Optional</span></summary>
         <div class="panel">
           <label>Travel hours
@@ -419,7 +404,7 @@
         </div>
       </details>
 
-      <details data-group="0,1,2,3,4">
+      <details data-section="court">
         <summary><span class="caret"></span>Court-Related Services <span class="badge">Optional</span></summary>
         <div class="panel">
           <div class="row">
@@ -439,14 +424,14 @@
         </div>
       </details>
 
-      <details data-group="0,1,2,3">
+      <details data-section="expedite">
         <summary><span class="caret"></span>Expedite Fee <span class="badge">Optional</span></summary>
         <div class="panel">
           <label style="display:flex;align-items:center;gap:8px;">
             <input id="expedite" type="checkbox" onchange="recalc()" style="width:auto;" />
             Expedite requested (services needed within 14 days)
           </label>
-          <div class="hint">Adds a flat $1,500 expedite fee.</div>
+          <div class="hint" id="expediteHint"></div>
         </div>
       </details>
 
@@ -471,119 +456,21 @@
       currency: "USD",
       maximumFractionDigits: 0
     }).format(n);
+    // Per-page rates always show cents ($3.00/page), matching the PDFs.
+    const RATE = n => new Intl.NumberFormat(undefined, {
+      style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2
+    }).format(n);
 
+    // fee-schedules:begin — generated by caselynx-fee-schedules/build.py; do not edit by hand
     const FEE_GROUPS = {
-      group0: {
-        label: "Group 0 — Neurosurgery",
-        specialties: "Neurosurgery",
-        exam: 8495,
-        review: 6245,
-        examOnly: 2250,
-        page1: 11.50,
-        page2: 11.50,
-        page3: 11.50,
-        xray: 150,
-        mriCt: 300,
-        addendumFlat: 1800,
-        addendumExtraPerPage: 11.50,
-        tele: 1150,
-        travel: 1150,
-        depositionBase: 4000,
-        depositionExtraHourly: 1150,
-        testimonyDay: 17500,
-        prepHourly: 1150,
-        expedite: 1500,
-        roomReservation: 150
-      },
-      group1: {
-        label: "Group 1 — Orthopedics",
-        specialties: "Orthopedic Surgery",
-        exam: 5750,
-        review: 3500,
-        examOnly: 2250,
-        page1: 6.00,
-        page2: 3.75,
-        page3: 1.25,
-        xray: 150,
-        mriCt: 300,
-        addendumFlat: 1000,
-        addendumExtraPerPage: 6.00,
-        tele: 1000,
-        travel: 1000,
-        depositionBase: 3500,
-        depositionExtraHourly: 1000,
-        testimonyDay: 14500,
-        prepHourly: 1000,
-        expedite: 1500,
-        roomReservation: 150
-      },
-      group2: {
-        label: "Group 2 — Non-Surgical Specialists",
-        specialties: "PM&R (Physiatry), Neurology, Pain Management, Cardiology, Psychiatry, Podiatry, & Urology",
-        exam: 4600,
-        review: 2800,
-        examOnly: 1800,
-        page1: 4.80,
-        page2: 3.00,
-        page3: 1.00,
-        xray: 120,
-        mriCt: 240,
-        addendumFlat: 800,
-        addendumExtraPerPage: 4.80,
-        tele: 800,
-        travel: 800,
-        depositionBase: 2800,
-        depositionExtraHourly: 800,
-        testimonyDay: 11600,
-        prepHourly: 800,
-        expedite: 1500,
-        roomReservation: 150
-      },
-      group3: {
-        label: "Group 3 — General Practice",
-        specialties: "Dentistry / Oral Surgery, Chiropractic, & Family Medicine / Internal Medicine",
-        exam: 3750,
-        review: 2275,
-        examOnly: 1475,
-        page1: 3.90,
-        page2: 2.45,
-        page3: 0.80,
-        xray: 100,
-        mriCt: 200,
-        addendumFlat: 650,
-        addendumExtraPerPage: 3.90,
-        tele: 650,
-        travel: 650,
-        depositionBase: 2275,
-        depositionExtraHourly: 650,
-        testimonyDay: 9425,
-        prepHourly: 650,
-        expedite: 1500,
-        roomReservation: 150
-      },
-      group4: {
-        label: "Group 4 — Radiology",
-        specialties: "Imaging Review Services",
-        exam: 0,
-        review: 0,
-        examOnly: 0,
-        page1: 0,
-        page2: 0,
-        page3: 0,
-        xray: 275,
-        mriCt: 550,
-        addendumFlat: 0,
-        addendumExtraPerPage: 0,
-        tele: 1000,
-        travel: 1000,
-        depositionBase: 3500,
-        depositionExtraHourly: 1000,
-        testimonyDay: 14500,
-        prepHourly: 1000,
-        expedite: 1500,
-        roomReservation: 0
-      }
+      group0: {"id": 0, "label": "Group 0 — Neurosurgery", "name": "Neurosurgery", "blurb": "Neurosurgery", "sections": ["core", "imaging", "addendum", "tele", "travel", "court", "expedite"], "imagingOnly": false, "recordsPerPage": 0, "caseTypes": [{"label": "IME / CME", "amount": 8495}, {"label": "Record Review Only", "amount": 6245}], "exam": 8495, "review": 6245, "examOnly": 2250, "xray": 150, "mriCt": 300, "addendumFlat": 900, "addendumExtraPerPage": 11.5, "tele": 1150, "travel": 1150, "depositionBase": 4000, "depositionExtraHourly": 1150, "testimonyDay": 17500, "prepHourly": 1150, "expedite": 1500, "roomReservation": 150, "page1": 11.5, "page2": 11.5, "page3": 11.5},
+      group1: {"id": 1, "label": "Group 1 — Orthopedic Surgery", "name": "Orthopedics", "blurb": "Orthopedic Surgery", "sections": ["core", "imaging", "addendum", "tele", "travel", "court", "expedite"], "imagingOnly": false, "recordsPerPage": 0, "caseTypes": [{"label": "IME / CME", "amount": 5750}, {"label": "Record Review Only", "amount": 3500}], "exam": 5750, "review": 3500, "examOnly": 2250, "xray": 150, "mriCt": 300, "addendumFlat": 500, "addendumExtraPerPage": 6, "tele": 1000, "travel": 1000, "depositionBase": 3500, "depositionExtraHourly": 1000, "testimonyDay": 14500, "prepHourly": 1000, "expedite": 1500, "roomReservation": 150, "page1": 6.0, "page2": 3.75, "page3": 1.25},
+      group2: {"id": 2, "label": "Group 2 — Medical & Dental Specialists", "name": "Medical & Dental", "blurb": "PM&R, Neurology, Pain Mgmt, Cardiology, Psychiatry, Podiatry, Pulmonology, Urology, Ophthalmology, & Oral Surgery", "sections": ["core", "imaging", "addendum", "tele", "travel", "court", "expedite"], "imagingOnly": false, "recordsPerPage": 0, "caseTypes": [{"label": "IME / CME", "amount": 4600}, {"label": "Record Review Only", "amount": 2800}], "exam": 4600, "review": 2800, "examOnly": 1800, "xray": 120, "mriCt": 240, "addendumFlat": 400, "addendumExtraPerPage": 4.8, "tele": 800, "travel": 800, "depositionBase": 2800, "depositionExtraHourly": 800, "testimonyDay": 11600, "prepHourly": 800, "expedite": 1500, "roomReservation": 150, "page1": 4.8, "page2": 3.0, "page3": 1.0},
+      group3: {"id": 3, "label": "Group 3 — General Practice", "name": "General Practice", "blurb": "Dentistry, Chiropractic, & Family Medicine", "sections": ["core", "imaging", "addendum", "tele", "travel", "court", "expedite"], "imagingOnly": false, "recordsPerPage": 0, "caseTypes": [{"label": "IME / CME", "amount": 3750}, {"label": "Record Review Only", "amount": 2275}], "exam": 3750, "review": 2275, "examOnly": 1475, "xray": 100, "mriCt": 200, "addendumFlat": 325, "addendumExtraPerPage": 3.9, "tele": 650, "travel": 650, "depositionBase": 2275, "depositionExtraHourly": 650, "testimonyDay": 9425, "prepHourly": 650, "expedite": 1500, "roomReservation": 150, "page1": 3.9, "page2": 2.45, "page3": 0.8},
+      group4: {"id": 4, "label": "Group 4 — Radiology", "name": "Radiology", "blurb": "Imaging Review Services", "sections": ["imaging", "tele", "travel", "court", "records"], "imagingOnly": true, "recordsPerPage": 6, "caseTypes": [], "exam": 0, "review": 0, "examOnly": 0, "xray": 275, "mriCt": 550, "addendumFlat": 0, "addendumExtraPerPage": 0, "tele": 1000, "travel": 1000, "depositionBase": 3500, "depositionExtraHourly": 1000, "testimonyDay": 14500, "prepHourly": 1000, "expedite": 0, "roomReservation": 0, "page1": 0, "page2": 0, "page3": 0},
+      group5: {"id": 5, "label": "Group 5 — Neuropsychology", "name": "Neuropsychology", "blurb": "Neuropsychological & Psychological Evaluations", "sections": ["core", "imaging", "addendum", "tele", "travel", "court", "expedite"], "imagingOnly": false, "recordsPerPage": 0, "caseTypes": [{"label": "Neuropsych Evaluation", "amount": 8125}, {"label": "Psych Evaluation", "amount": 5200}, {"label": "Record Review", "amount": 2275}], "exam": 0, "review": 2275, "examOnly": 0, "xray": 100, "mriCt": 200, "addendumFlat": 325, "addendumExtraPerPage": 3.9, "tele": 650, "travel": 650, "depositionBase": 2275, "depositionExtraHourly": 650, "testimonyDay": 9425, "prepHourly": 650, "expedite": 1500, "roomReservation": 150, "page1": 3.9, "page2": 2.45, "page3": 0.8},
     };
+    // fee-schedules:end
 
     let selectedGroup = "group1";
 
@@ -591,27 +478,55 @@
       return FEE_GROUPS[selectedGroup];
     }
 
+    function renderLegend() {
+      const legend = document.getElementById("group-legend");
+      Object.entries(FEE_GROUPS).forEach(([key, g]) => {
+        const card = document.createElement("div");
+        card.className = "legend-card";
+        card.id = "legend-" + key;
+        card.onclick = () => selectGroup(key);
+        [["div", "kicker", "Group " + g.id], ["h3", "", g.name], ["p", "", g.blurb]].forEach(([tag, cls, text]) => {
+          const el = document.createElement(tag);
+          if (cls) el.className = cls;
+          el.textContent = text;
+          card.appendChild(el);
+        });
+        legend.appendChild(card);
+      });
+    }
+
     function updateLegend() {
-      ["group0", "group1", "group2", "group3", "group4"].forEach(group => {
+      Object.keys(FEE_GROUPS).forEach(group => {
         const el = document.getElementById("legend-" + group);
         if (el) el.classList.toggle("active", group === selectedGroup);
       });
     }
 
     function updateFormVisibility() {
-      const details = document.querySelectorAll("details[data-group]");
-      const groupNum = selectedGroup.replace("group", ""); // Convert "group1" to "1"
-      details.forEach(detail => {
-        const groups = detail.getAttribute("data-group").split(",");
-        detail.classList.toggle("hidden", !groups.includes(groupNum));
+      const sections = getSelectedFees().sections;
+      document.querySelectorAll("details[data-section]").forEach(detail => {
+        detail.classList.toggle("hidden", !sections.includes(detail.getAttribute("data-section")));
+      });
+    }
+
+    // Case Type options come from the group (e.g. IME / Record Review, or
+    // Neuropsych / Psych Evaluation for Neuropsychology).
+    function updateCaseTypes() {
+      const select = document.getElementById("caseType");
+      select.innerHTML = "";
+      getSelectedFees().caseTypes.forEach((c, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = c.label;
+        select.appendChild(opt);
       });
     }
 
     function updateFeeText() {
       const f = getSelectedFees();
 
-      if (selectedGroup === "group4") {
-        // Radiology-specific text
+      if (f.imagingOnly) {
+        // Imaging-only group (e.g. Radiology)
         document.getElementById("feeHint").innerHTML = `<strong>${f.label}</strong> — Imaging review services. Enter imaging study counts below.`;
         document.getElementById("imagingHint").textContent =
           `X-ray/Standard: ${USD(f.xray)}/study; MRI/CT: ${USD(f.mriCt)}/study.`;
@@ -619,18 +534,24 @@
         // Surgical/non-surgical specialists
         document.getElementById("feeHint").innerHTML =
           `Selected fee schedule: <strong>${f.label}</strong><br>` +
-          `Base: ${USD(f.exam)} (IME/CME) or ${USD(f.review)} (Record Review), includes up to 600 pages.<br>` +
-          `Overage: 600–1,000 @ ${USD(f.page1)}/page; 1,000–5,000 @ ${USD(f.page2)}/page; 5,000+ @ ${USD(f.page3)}/page.`;
+          `Base: ${f.caseTypes.map(c => `${USD(c.amount)} (${c.label})`).join(" or ")}, includes up to 600 pages.<br>` +
+          `Overage: 600–1,000 @ ${RATE(f.page1)}/page; 1,000–5,000 @ ${RATE(f.page2)}/page; 5,000+ @ ${RATE(f.page3)}/page.`;
 
         document.getElementById("imagingHint").textContent =
           `X-ray: ${USD(f.xray)}/study; MRI/CT: ${USD(f.mriCt)}/study.`;
 
         document.getElementById("addendumHint").textContent =
-          `Includes up to 200 pages; additional pages billed at ${USD(f.addendumExtraPerPage)}/page. Flat fee: ${USD(f.addendumFlat)}.`;
+          `${USD(f.addendumFlat)} flat fee + ${RATE(f.addendumExtraPerPage)} per page of records + ${USD(f.xray)} per X-ray study + ${USD(f.mriCt)} per MRI or CT study.`;
       }
 
+      document.getElementById("expediteHint").textContent =
+        `Adds a flat ${USD(f.expedite)} expedite fee.`;
+
       document.getElementById("teleHint").textContent =
-        `${USD(f.tele)}/hour (1-hour minimum).`;
+        `${USD(f.tele)}/hour (½ hour minimum).`;
+
+      document.getElementById("recordsHint").textContent =
+        `${RATE(f.recordsPerPage || 0)} per page of medical records reviewed.`;
 
       document.getElementById("travelHint").textContent =
         `${USD(f.travel)}/hour.`;
@@ -649,8 +570,8 @@
     }
 
     function calcCore(pages, type, f) {
-      if (selectedGroup === "group4") return { base: 0, over: { t1: 0, t2: 0, t3: 0, total: 0 }, total: 0 };
-      const base = (type === "review") ? f.review : f.exam;
+      if (f.imagingOnly) return { base: 0, over: { t1: 0, t2: 0, t3: 0, total: 0 }, total: 0 };
+      const base = f.caseTypes[type] ? f.caseTypes[type].amount : 0;
       const over = pageOverage(pages, f);
       return { base, over, total: base + over.total };
     }
@@ -663,15 +584,18 @@
       };
     }
 
-    function calcAddendum(p, f) {
-      if (!p || selectedGroup === "group4") return { flat: 0, extra: 0, total: 0, pages: 0 };
-      const extra = Math.max(0, p - 200) * f.addendumExtraPerPage;
-      return {
-        flat: f.addendumFlat,
-        extra,
-        total: f.addendumFlat + extra,
-        pages: p
-      };
+    // Addendum (Nov 2026): flat fee + every page of records + any imaging studies, each at the group's rate.
+    function calcAddendum(p, x, m, f) {
+      if (!(p || x || m) || !f.sections.includes("addendum")) return { flat: 0, pageTotal: 0, imgTotal: 0, total: 0, pages: 0, studies: 0 };
+      const pageTotal = p * f.addendumExtraPerPage;
+      const imgTotal = x * f.xray + m * f.mriCt;
+      return { flat: f.addendumFlat, pageTotal, imgTotal, total: f.addendumFlat + pageTotal + imgTotal, pages: p, studies: x + m };
+    }
+
+    // Groups that bill record pages per page from page 1 (e.g. Radiology's Medical Records Review).
+    function calcRecords(p, f) {
+      const total = f.sections.includes("records") ? p * (f.recordsPerPage || 0) : 0;
+      return { pages: p, total };
     }
 
     function calcMeetings(h, f) {
@@ -698,6 +622,8 @@
     }
 
     function calcExpedite(checked, f) {
+      // A box ticked under another group stays ticked when its section is hidden.
+      checked = checked && f.sections.includes("expedite");
       return {
         applied: checked,
         fee: checked ? f.expedite : 0,
@@ -713,8 +639,9 @@
       const xrays = parseInt(document.getElementById("xrays").value || 0, 10);
       const mricts = parseInt(document.getElementById("mricts").value || 0, 10);
 
-      const hasInput = selectedGroup === "group4" 
-        ? (xrays > 0 || mricts > 0)
+      const recPagesIn = parseInt(document.getElementById("recPages").value || 0, 10);
+      const hasInput = f.imagingOnly
+        ? (xrays > 0 || mricts > 0 || recPagesIn > 0)
         : (pages > 0);
 
       if (!hasInput) {
@@ -726,7 +653,9 @@
 
       const core = calcCore(pages, type, f);
       const img = calcImaging(xrays, mricts, f);
-      const add = calcAddendum(parseInt(document.getElementById("addPages").value || 0, 10), f);
+      const num = id => parseInt(document.getElementById(id).value || 0, 10);
+      const add = calcAddendum(num("addPages"), num("addXrays"), num("addMricts"), f);
+      const rec = calcRecords(num("recPages"), f);
       const mtg = calcMeetings(parseFloat(document.getElementById("teleCount").value || 0), f);
       const trv = calcTravel(parseFloat(document.getElementById("travelHrs").value || 0), f);
       const crt = calcCourt(
@@ -737,18 +666,19 @@
       );
       const xp = calcExpedite(document.getElementById("expedite").checked, f);
 
-      const total = core.total + img.total + add.total + mtg.total + trv.total + crt.total + xp.total;
+      const total = core.total + img.total + rec.total + add.total + mtg.total + trv.total + crt.total + xp.total;
 
       const lines = [];
 
-      if (selectedGroup === "group4") {
-        // Radiology output
+      if (f.imagingOnly) {
+        // Imaging-only output
         if (img.xr) lines.push([`Imaging — X-ray (${xrays})`, USD(img.xr)]);
         if (img.mc) lines.push([`Imaging — MRI/CT (${mricts})`, USD(img.mc)]);
+        if (rec.total) lines.push([`Medical records review (${rec.pages} pages)`, USD(rec.total)]);
       } else {
         // Surgical/non-surgical output
         lines.push([
-          `Base — ${type === "review" ? "Record Review" : "IME/CME"} (up to 600 pages)`,
+          `Base — ${f.caseTypes[type] ? f.caseTypes[type].label : ""} (up to 600 pages)`,
           USD(core.base)
         ]);
 
@@ -762,8 +692,9 @@
         if (img.mc) lines.push([`Imaging — MRI/CT (${mriCtCount})`, USD(img.mc)]);
 
         if (add.total) {
-          lines.push([`Addendum review & report`, USD(add.flat)]);
-          if (add.extra) lines.push([`Addendum extra pages (${add.pages - 200})`, USD(add.extra)]);
+          lines.push([`Addendum review & report (flat fee)`, USD(add.flat)]);
+          if (add.pageTotal) lines.push([`Addendum pages (${add.pages})`, USD(add.pageTotal)]);
+          if (add.imgTotal) lines.push([`Addendum imaging (${add.studies} stud${add.studies === 1 ? "y" : "ies"})`, USD(add.imgTotal)]);
         }
       }
 
@@ -793,12 +724,15 @@
       selectedGroup = group;
       updateLegend();
       updateFormVisibility();
+      updateCaseTypes();
       updateFeeText();
       recalc();
     }
 
+    renderLegend();
     updateLegend();
     updateFormVisibility();
+    updateCaseTypes();
     updateFeeText();
     recalc();
   </script>
